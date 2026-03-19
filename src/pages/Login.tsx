@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,44 +34,49 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen pt-16 flex items-center justify-center bg-secondary">
-      <div className="w-full max-w-md bg-background rounded-lg p-8 shadow-sm mx-4">
-        <div className="text-center mb-8">
-          <Link to="/" className="text-2xl font-black tracking-wider text-foreground">NOVANT</Link>
-          <h2 className="text-xl font-bold text-foreground mt-4">
+    <div className="min-h-screen pt-[70px] flex items-center justify-center bg-muted">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-md bg-card p-10 shadow-sm mx-4"
+      >
+        <div className="text-center mb-10">
+          <Link to="/" className="text-xl font-black tracking-[0.2em] text-primary uppercase">NOVANT</Link>
+          <h2 className="text-lg font-extrabold text-foreground mt-6 uppercase tracking-[0.1em]">
             {isRegister ? 'Criar Conta' : 'Entrar'}
           </h2>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-2 tracking-wider">
             {isRegister ? 'Preencha os dados para se cadastrar' : 'Acesse sua conta Novant'}
           </p>
         </div>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-5" onSubmit={handleSubmit}>
           {isRegister && (
             <div>
-              <Label htmlFor="name" className="text-sm font-medium text-foreground">Nome completo</Label>
-              <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Seu nome" className="mt-1" required />
+              <Label htmlFor="name" className="text-[11px] font-medium text-foreground uppercase tracking-wider">Nome completo</Label>
+              <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Seu nome" className="mt-2 rounded-none" required />
             </div>
           )}
           <div>
-            <Label htmlFor="email" className="text-sm font-medium text-foreground">Email</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" className="mt-1" required />
+            <Label htmlFor="email" className="text-[11px] font-medium text-foreground uppercase tracking-wider">Email</Label>
+            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" className="mt-2 rounded-none" required />
           </div>
           <div>
-            <Label htmlFor="password" className="text-sm font-medium text-foreground">Senha</Label>
-            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="mt-1" required minLength={6} />
+            <Label htmlFor="password" className="text-[11px] font-medium text-foreground uppercase tracking-wider">Senha</Label>
+            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="mt-2 rounded-none" required minLength={6} />
           </div>
-          <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-accent font-semibold" disabled={loading}>
+          <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary-hover font-semibold rounded-none text-xs uppercase tracking-[0.15em] py-6" disabled={loading}>
             {loading ? 'Carregando...' : isRegister ? 'Criar Conta' : 'Entrar'}
           </Button>
         </form>
 
-        <div className="mt-6 text-center">
-          <button onClick={() => setIsRegister(!isRegister)} className="text-sm text-primary hover:text-accent transition-colors font-medium">
+        <div className="mt-8 text-center">
+          <button onClick={() => setIsRegister(!isRegister)} className="text-[11px] text-primary hover:text-primary-hover font-medium uppercase tracking-wider">
             {isRegister ? 'Já tem conta? Entrar' : 'Não tem conta? Cadastre-se'}
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
