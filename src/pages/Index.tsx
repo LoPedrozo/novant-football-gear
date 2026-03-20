@@ -185,17 +185,27 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <SectionTitle>Nossas Marcas</SectionTitle>
           <div className="flex flex-wrap items-center justify-center gap-12 md:gap-16">
-            {brands.map((brand, i) => (
-              <motion.span
-                key={brand}
+            {[
+              { name: 'Nike', slug: 'nike' },
+              { name: 'Adidas', slug: 'adidas' },
+              { name: 'Puma', slug: 'puma' },
+              { name: 'New Balance', slug: 'newbalance' },
+              { name: 'Umbro', slug: 'umbro' },
+            ].map((brand, i) => (
+              <motion.div
+                key={brand.name}
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="text-2xl md:text-3xl font-extrabold text-[#1A2F23]/15 hover:text-[#1A2F23] transition-colors duration-500 cursor-pointer tracking-[5px] uppercase select-none grayscale hover:grayscale-0"
+                className="cursor-pointer opacity-20 hover:opacity-70 transition-opacity duration-500"
               >
-                {brand}
-              </motion.span>
+                <img
+                  src={`https://cdn.simpleicons.org/${brand.slug}/1A2F23`}
+                  alt={brand.name}
+                  className="h-8 md:h-10 w-auto"
+                />
+              </motion.div>
             ))}
           </div>
         </div>
