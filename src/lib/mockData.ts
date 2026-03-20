@@ -88,7 +88,7 @@ export const products: Product[] = [
     original_price: 799.90,
     brand: 'Umbro',
     category: 'campo',
-    image_url: 'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=400&fit=crop',
+    image_url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop',
     rating: 4.3,
     reviews_count: 67,
     sizes: ['38', '39', '40', '41', '42', '43'],
