@@ -104,7 +104,7 @@ export const products: Product[] = [
     original_price: null,
     brand: 'Nike',
     category: 'futsal',
-    image_url: 'https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=400&h=400&fit=crop',
+    image_url: 'https://images.unsplash.com/photo-1556906781-9a412961c28c?w=400&h=400&fit=crop',
     rating: 4.6,
     reviews_count: 312,
     sizes: ['38', '39', '40', '41', '42', '43'],
