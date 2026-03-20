@@ -120,7 +120,7 @@ export const products: Product[] = [
     original_price: 749.90,
     brand: 'Adidas',
     category: 'futsal',
-    image_url: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=400&h=400&fit=crop',
+    image_url: 'https://images.unsplash.com/photo-1579338559194-a162d19bf842?w=400&h=400&fit=crop',
     rating: 4.5,
     reviews_count: 201,
     sizes: ['38', '39', '40', '41', '42'],
