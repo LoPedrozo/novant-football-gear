@@ -72,7 +72,7 @@ export const products: Product[] = [
     original_price: null,
     brand: 'New Balance',
     category: 'campo',
-    image_url: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400&h=400&fit=crop',
+    image_url: 'https://images.unsplash.com/photo-1576858574144-9ae1ebcf5ae5?w=400&h=400&fit=crop',
     rating: 4.4,
     reviews_count: 98,
     sizes: ['38', '39', '40', '41', '42'],
