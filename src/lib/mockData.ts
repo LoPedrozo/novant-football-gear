@@ -56,7 +56,7 @@ export const products: Product[] = [
     original_price: 1199.90,
     brand: 'Puma',
     category: 'campo',
-    image_url: 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=400&h=400&fit=crop',
+    image_url: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&h=400&fit=crop',
     rating: 4.5,
     reviews_count: 156,
     sizes: ['39', '40', '41', '42', '43'],
