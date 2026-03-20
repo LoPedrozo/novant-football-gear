@@ -211,10 +211,10 @@ export const products: Product[] = [
 ];
 
 export const categories = [
-  { name: 'Chuteiras Campo', slug: 'campo', image: 'https://images.unsplash.com/photo-1511886929837-354d827aae26?w=600&h=400&fit=crop' },
-  { name: 'Chuteiras Futsal', slug: 'futsal', image: 'https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=600&h=400&fit=crop' },
-  { name: 'Chuteiras Society', slug: 'society', image: 'https://images.unsplash.com/photo-1614632537197-38a17061c2bd?w=600&h=400&fit=crop' },
-  { name: 'Acessórios', slug: 'acessorios', image: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=600&h=400&fit=crop' },
+  { name: 'Chuteiras Campo', slug: 'campo', image: 'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=600&h=400&fit=crop' },
+  { name: 'Chuteiras Futsal', slug: 'futsal', image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&h=400&fit=crop' },
+  { name: 'Chuteiras Society', slug: 'society', image: 'https://images.unsplash.com/photo-1553778263-73a83bab9b0c?w=600&h=400&fit=crop' },
+  { name: 'Acessórios', slug: 'acessorios', image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=600&h=400&fit=crop' },
 ];
 
 export const brands = ['Nike', 'Adidas', 'Puma', 'New Balance', 'Umbro'];
