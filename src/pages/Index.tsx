@@ -3,6 +3,7 @@ import { ArrowRight, Truck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ProductCard from '@/components/ProductCard';
 import { products, categories, brands } from '@/lib/mockData';
+import umbroLogo from '@/assets/brands/umbro-logo.png';
 
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
   <div className="text-center mb-16">
