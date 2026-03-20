@@ -40,7 +40,7 @@ export const products: Product[] = [
     original_price: null,
     brand: 'Adidas',
     category: 'campo',
-    image_url: 'https://images.unsplash.com/photo-1575537302964-96cd47c06b1b?w=400&h=400&fit=crop',
+    image_url: 'https://images.unsplash.com/photo-1511886929837-354d827aae26?w=400&h=400&fit=crop',
     rating: 4.7,
     reviews_count: 189,
     sizes: ['38', '39', '40', '41', '42', '43', '44'],
