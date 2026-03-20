@@ -187,11 +187,11 @@ const Index = () => {
           <SectionTitle>Nossas Marcas</SectionTitle>
           <div className="flex flex-wrap items-center justify-center gap-12 md:gap-16">
             {[
-              { name: 'Nike', slug: 'nike' },
-              { name: 'Adidas', slug: 'adidas' },
-              { name: 'Puma', slug: 'puma' },
-              { name: 'New Balance', slug: 'newbalance' },
-              { name: 'Umbro', slug: 'umbro' },
+              { name: 'Nike', slug: 'nike', custom: null },
+              { name: 'Adidas', slug: 'adidas', custom: null },
+              { name: 'Puma', slug: 'puma', custom: null },
+              { name: 'New Balance', slug: 'newbalance', custom: null },
+              { name: 'Umbro', slug: 'umbro', custom: umbroLogo },
             ].map((brand, i) => (
               <motion.div
                 key={brand.name}
@@ -202,7 +202,7 @@ const Index = () => {
                 className="cursor-pointer opacity-20 hover:opacity-70 transition-opacity duration-500"
               >
                 <img
-                  src={`https://cdn.simpleicons.org/${brand.slug}/1A2F23`}
+                  src={brand.custom || `https://cdn.simpleicons.org/${brand.slug}/1A2F23`}
                   alt={brand.name}
                   className="h-8 md:h-10 w-auto"
                 />
