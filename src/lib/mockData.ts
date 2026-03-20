@@ -152,7 +152,7 @@ export const products: Product[] = [
     original_price: 699.90,
     brand: 'Adidas',
     category: 'society',
-    image_url: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=400&fit=crop',
+    image_url: 'https://images.unsplash.com/photo-1509027572446-af8401acfdc3?w=400&h=400&fit=crop',
     rating: 4.6,
     reviews_count: 178,
     sizes: ['38', '39', '40', '41', '42', '43'],
