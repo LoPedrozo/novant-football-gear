@@ -168,7 +168,7 @@ export const products: Product[] = [
     original_price: null,
     brand: 'Nike',
     category: 'acessorios',
-    image_url: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=400&h=400&fit=crop',
+    image_url: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400&h=400&fit=crop',
     rating: 4.4,
     reviews_count: 89,
     sizes: ['P', 'M', 'G'],
