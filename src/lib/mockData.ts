@@ -136,7 +136,7 @@ export const products: Product[] = [
     original_price: null,
     brand: 'Puma',
     category: 'society',
-    image_url: 'https://images.unsplash.com/photo-1614632537197-38a17061c2bd?w=400&h=400&fit=crop',
+    image_url: 'https://images.unsplash.com/photo-1470224114660-3f6686c562eb?w=400&h=400&fit=crop',
     rating: 4.3,
     reviews_count: 145,
     sizes: ['39', '40', '41', '42', '43'],
