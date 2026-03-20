@@ -1,3 +1,21 @@
+import mercurialVapor from '@/assets/products/mercurial-vapor.jpg';
+import predatorEdge from '@/assets/products/predator-edge.jpg';
+import futureUltimate from '@/assets/products/future-ultimate.jpg';
+import furonV7 from '@/assets/products/furon-v7.jpg';
+import velocitaVi from '@/assets/products/velocita-vi.jpg';
+import reactGato from '@/assets/products/react-gato.jpg';
+import topSala from '@/assets/products/top-sala.jpg';
+import futurePlay from '@/assets/products/future-play.jpg';
+import copaPure from '@/assets/products/copa-pure.jpg';
+import caneleiraMercurial from '@/assets/products/caneleira-mercurial.jpg';
+import meiaPerformance from '@/assets/products/meia-performance.jpg';
+import phantomLuna from '@/assets/products/phantom-luna.jpg';
+
+import catCampo from '@/assets/categories/campo.jpg';
+import catFutsal from '@/assets/categories/futsal.jpg';
+import catSociety from '@/assets/categories/society.jpg';
+import catAcessorios from '@/assets/categories/acessorios.jpg';
+
 export interface Product {
   id: string;
   name: string;
@@ -24,7 +42,7 @@ export const products: Product[] = [
     original_price: 1599.90,
     brand: 'Nike',
     category: 'campo',
-    image_url: 'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=400&h=400&fit=crop',
+    image_url: mercurialVapor,
     rating: 4.8,
     reviews_count: 234,
     sizes: ['38', '39', '40', '41', '42', '43'],
@@ -40,7 +58,7 @@ export const products: Product[] = [
     original_price: null,
     brand: 'Adidas',
     category: 'campo',
-    image_url: 'https://images.unsplash.com/photo-1511886929837-354d827aae26?w=400&h=400&fit=crop',
+    image_url: predatorEdge,
     rating: 4.7,
     reviews_count: 189,
     sizes: ['38', '39', '40', '41', '42', '43', '44'],
@@ -56,7 +74,7 @@ export const products: Product[] = [
     original_price: 1199.90,
     brand: 'Puma',
     category: 'campo',
-    image_url: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&h=400&fit=crop',
+    image_url: futureUltimate,
     rating: 4.5,
     reviews_count: 156,
     sizes: ['39', '40', '41', '42', '43'],
@@ -72,7 +90,7 @@ export const products: Product[] = [
     original_price: null,
     brand: 'New Balance',
     category: 'campo',
-    image_url: 'https://images.unsplash.com/photo-1576858574144-9ae1ebcf5ae5?w=400&h=400&fit=crop',
+    image_url: furonV7,
     rating: 4.4,
     reviews_count: 98,
     sizes: ['38', '39', '40', '41', '42'],
@@ -88,7 +106,7 @@ export const products: Product[] = [
     original_price: 799.90,
     brand: 'Umbro',
     category: 'campo',
-    image_url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop',
+    image_url: velocitaVi,
     rating: 4.3,
     reviews_count: 67,
     sizes: ['38', '39', '40', '41', '42', '43'],
@@ -104,7 +122,7 @@ export const products: Product[] = [
     original_price: null,
     brand: 'Nike',
     category: 'futsal',
-    image_url: 'https://images.unsplash.com/photo-1556906781-9a412961c28c?w=400&h=400&fit=crop',
+    image_url: reactGato,
     rating: 4.6,
     reviews_count: 312,
     sizes: ['38', '39', '40', '41', '42', '43'],
@@ -120,7 +138,7 @@ export const products: Product[] = [
     original_price: 749.90,
     brand: 'Adidas',
     category: 'futsal',
-    image_url: 'https://images.unsplash.com/photo-1579338559194-a162d19bf842?w=400&h=400&fit=crop',
+    image_url: topSala,
     rating: 4.5,
     reviews_count: 201,
     sizes: ['38', '39', '40', '41', '42'],
@@ -136,7 +154,7 @@ export const products: Product[] = [
     original_price: null,
     brand: 'Puma',
     category: 'society',
-    image_url: 'https://images.unsplash.com/photo-1470224114660-3f6686c562eb?w=400&h=400&fit=crop',
+    image_url: futurePlay,
     rating: 4.3,
     reviews_count: 145,
     sizes: ['39', '40', '41', '42', '43'],
@@ -152,7 +170,7 @@ export const products: Product[] = [
     original_price: 699.90,
     brand: 'Adidas',
     category: 'society',
-    image_url: 'https://images.unsplash.com/photo-1509027572446-af8401acfdc3?w=400&h=400&fit=crop',
+    image_url: copaPure,
     rating: 4.6,
     reviews_count: 178,
     sizes: ['38', '39', '40', '41', '42', '43'],
@@ -168,7 +186,7 @@ export const products: Product[] = [
     original_price: null,
     brand: 'Nike',
     category: 'acessorios',
-    image_url: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400&h=400&fit=crop',
+    image_url: caneleiraMercurial,
     rating: 4.4,
     reviews_count: 89,
     sizes: ['P', 'M', 'G'],
@@ -184,7 +202,7 @@ export const products: Product[] = [
     original_price: 99.90,
     brand: 'Adidas',
     category: 'acessorios',
-    image_url: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=400&h=400&fit=crop',
+    image_url: meiaPerformance,
     rating: 4.2,
     reviews_count: 56,
     sizes: ['P', 'M', 'G', 'GG'],
@@ -200,7 +218,7 @@ export const products: Product[] = [
     original_price: 1399.90,
     brand: 'Nike',
     category: 'campo',
-    image_url: 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=400&h=400&fit=crop',
+    image_url: phantomLuna,
     rating: 4.9,
     reviews_count: 267,
     sizes: ['35', '36', '37', '38', '39', '40'],
@@ -211,10 +229,10 @@ export const products: Product[] = [
 ];
 
 export const categories = [
-  { name: 'Chuteiras Campo', slug: 'campo', image: 'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=600&h=400&fit=crop' },
-  { name: 'Chuteiras Futsal', slug: 'futsal', image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&h=400&fit=crop' },
-  { name: 'Chuteiras Society', slug: 'society', image: 'https://images.unsplash.com/photo-1553778263-73a83bab9b0c?w=600&h=400&fit=crop' },
-  { name: 'Acessórios', slug: 'acessorios', image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=600&h=400&fit=crop' },
+  { name: 'Chuteiras Campo', slug: 'campo', image: catCampo },
+  { name: 'Chuteiras Futsal', slug: 'futsal', image: catFutsal },
+  { name: 'Chuteiras Society', slug: 'society', image: catSociety },
+  { name: 'Acessórios', slug: 'acessorios', image: catAcessorios },
 ];
 
 export const brands = ['Nike', 'Adidas', 'Puma', 'New Balance', 'Umbro'];
