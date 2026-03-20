@@ -25,43 +25,45 @@ const Navbar = () => {
 
   return (
     <nav className={cn(
-      "fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-b transition-shadow duration-300",
-      scrolled ? "shadow-md" : "shadow-none"
+      "sticky top-0 left-0 right-0 z-50 bg-[#f8f7f4] border-b border-[#eae7e0] transition-shadow duration-300",
+      scrolled ? "shadow-sm" : "shadow-none"
     )}>
       <div className="container mx-auto px-4 h-[70px] flex items-center justify-between">
-        <Link to="/" className="text-xl font-black tracking-[0.2em] text-primary uppercase">
+        {/* Logo */}
+        <Link to="/" className="text-lg font-bold tracking-[8px] text-[#1A2F23] uppercase">
           NOVANT
         </Link>
 
+        {/* Center nav links */}
         <div className="hidden md:flex items-center gap-10">
-          <Link to="/" className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground">Home</Link>
-          <Link to="/catalogo" className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground">Catálogo</Link>
-          <Link to="/sobre" className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground">Sobre Nós</Link>
+          <Link to="/" className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] opacity-40 hover:opacity-100 transition-opacity duration-300">Home</Link>
+          <Link to="/catalogo" className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] opacity-40 hover:opacity-100 transition-opacity duration-300">Catálogo</Link>
+          <Link to="/sobre" className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] opacity-40 hover:opacity-100 transition-opacity duration-300">Sobre Nós</Link>
         </div>
 
+        {/* Right icons */}
         <div className="hidden md:flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-35 hover:opacity-100 hover:bg-transparent">
             <Search className="h-[18px] w-[18px]" strokeWidth={1.5} />
           </Button>
-          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-35 hover:opacity-100 hover:bg-transparent">
             <Heart className="h-[18px] w-[18px]" strokeWidth={1.5} />
           </Button>
-          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground relative">
+          <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-35 hover:opacity-100 hover:bg-transparent relative">
             <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.5} />
-            <span className="absolute -top-0.5 -right-0.5 bg-accent text-accent-foreground text-[9px] font-bold h-4 w-4 flex items-center justify-center">0</span>
           </Button>
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-                  <div className="h-7 w-7 bg-primary flex items-center justify-center">
-                    <span className="text-[10px] font-bold text-primary-foreground">
+                <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-35 hover:opacity-100 hover:bg-transparent">
+                  <div className="h-7 w-7 bg-[#1A2F23] flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-[#E8E3DA]">
                       {(user.user_metadata?.full_name || user.email || 'U').charAt(0).toUpperCase()}
                     </span>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-48 rounded-none">
                 <DropdownMenuItem className="flex items-center gap-2 text-xs uppercase tracking-wider">
                   <UserCircle className="h-4 w-4" /> Meu Perfil
                 </DropdownMenuItem>
@@ -79,33 +81,34 @@ const Navbar = () => {
             </DropdownMenu>
           ) : (
             <Link to="/login">
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+              <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-35 hover:opacity-100 hover:bg-transparent">
                 <User className="h-[18px] w-[18px]" strokeWidth={1.5} />
               </Button>
             </Link>
           )}
         </div>
 
-        <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
+        {/* Mobile hamburger */}
+        <Button variant="ghost" size="icon" className="md:hidden text-[#1A2F23]" onClick={() => setMobileOpen(!mobileOpen)}>
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
       </div>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 top-[70px] bg-card z-40 animate-in slide-in-from-right">
+        <div className="md:hidden fixed inset-0 top-[70px] bg-[#f8f7f4] z-40">
           <div className="flex flex-col p-8 gap-6">
-            <Link to="/" onClick={() => setMobileOpen(false)} className="text-sm font-medium uppercase tracking-[0.15em] text-foreground py-2 border-b border-border">Home</Link>
-            <Link to="/catalogo" onClick={() => setMobileOpen(false)} className="text-sm font-medium uppercase tracking-[0.15em] text-foreground py-2 border-b border-border">Catálogo</Link>
-            <Link to="/sobre" onClick={() => setMobileOpen(false)} className="text-sm font-medium uppercase tracking-[0.15em] text-foreground py-2 border-b border-border">Sobre Nós</Link>
-            <div className="flex items-center gap-4 pt-4">
-              <Search className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
-              <Heart className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
-              <ShoppingBag className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
+            <Link to="/" onClick={() => setMobileOpen(false)} className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] py-3 border-b border-[#eae7e0]">Home</Link>
+            <Link to="/catalogo" onClick={() => setMobileOpen(false)} className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] py-3 border-b border-[#eae7e0]">Catálogo</Link>
+            <Link to="/sobre" onClick={() => setMobileOpen(false)} className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] py-3 border-b border-[#eae7e0]">Sobre Nós</Link>
+            <div className="flex items-center gap-5 pt-4">
+              <Search className="h-5 w-5 text-[#1A2F23] opacity-35" strokeWidth={1.5} />
+              <Heart className="h-5 w-5 text-[#1A2F23] opacity-35" strokeWidth={1.5} />
+              <ShoppingBag className="h-5 w-5 text-[#1A2F23] opacity-35" strokeWidth={1.5} />
               {user ? (
-                <button onClick={handleSignOut} className="ml-auto text-xs uppercase tracking-wider text-destructive font-medium">Sair</button>
+                <button onClick={handleSignOut} className="ml-auto text-[10px] uppercase tracking-[2.5px] text-destructive font-medium">Sair</button>
               ) : (
-                <Link to="/login" onClick={() => setMobileOpen(false)} className="ml-auto text-xs uppercase tracking-wider text-primary font-medium">Entrar</Link>
+                <Link to="/login" onClick={() => setMobileOpen(false)} className="ml-auto text-[10px] uppercase tracking-[2.5px] text-[#1A2F23] font-medium">Entrar</Link>
               )}
             </div>
           </div>

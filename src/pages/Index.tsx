@@ -1,17 +1,63 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Truck } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import { products, categories, brands } from '@/lib/mockData';
-import heroBg from '@/assets/hero-bg.jpg';
 
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
   <div className="text-center mb-16">
-    <h2 className="text-2xl font-extrabold text-foreground uppercase tracking-[0.15em]">
+    <h2 className="text-[10px] font-extrabold text-[#aaaaaa] uppercase tracking-[5px]">
       {children}
     </h2>
-    <div className="w-16 h-0.5 bg-primary mx-auto mt-4" />
+  </div>
+);
+
+/* SVG football field in perspective — decorative background for the hero */
+const FootballField = () => (
+  <div
+    className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none"
+    style={{ perspective: '800px' }}
+  >
+    <svg
+      viewBox="0 0 680 1050"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-[500px] md:w-[680px] h-auto"
+      style={{
+        transform: 'rotateX(55deg) rotateZ(-15deg)',
+        opacity: 1,
+      }}
+    >
+      {/* Outer rectangle */}
+      <rect x="40" y="40" width="600" height="970" stroke="rgba(232,227,218,0.05)" strokeWidth="2" />
+      {/* Center line */}
+      <line x1="40" y1="525" x2="640" y2="525" stroke="rgba(232,227,218,0.05)" strokeWidth="2" />
+      {/* Center circle */}
+      <circle cx="340" cy="525" r="91.5" stroke="rgba(232,227,218,0.05)" strokeWidth="2" />
+      {/* Center dot */}
+      <circle cx="340" cy="525" r="3" fill="rgba(232,227,218,0.05)" />
+      {/* Top penalty area */}
+      <rect x="148" y="40" width="384" height="165" stroke="rgba(232,227,218,0.05)" strokeWidth="2" />
+      {/* Top goal area */}
+      <rect x="228" y="40" width="224" height="55" stroke="rgba(232,227,218,0.05)" strokeWidth="2" />
+      {/* Top penalty arc */}
+      <path d="M 268 205 A 91.5 91.5 0 0 0 412 205" stroke="rgba(232,227,218,0.05)" strokeWidth="2" />
+      {/* Top penalty dot */}
+      <circle cx="340" cy="160" r="3" fill="rgba(232,227,218,0.05)" />
+      {/* Bottom penalty area */}
+      <rect x="148" y="845" width="384" height="165" stroke="rgba(232,227,218,0.05)" strokeWidth="2" />
+      {/* Bottom goal area */}
+      <rect x="228" y="955" width="224" height="55" stroke="rgba(232,227,218,0.05)" strokeWidth="2" />
+      {/* Bottom penalty arc */}
+      <path d="M 268 845 A 91.5 91.5 0 0 1 412 845" stroke="rgba(232,227,218,0.05)" strokeWidth="2" />
+      {/* Bottom penalty dot */}
+      <circle cx="340" cy="890" r="3" fill="rgba(232,227,218,0.05)" />
+      {/* Corner arcs */}
+      <path d="M 40 52 A 12 12 0 0 0 52 40" stroke="rgba(232,227,218,0.05)" strokeWidth="2" />
+      <path d="M 628 40 A 12 12 0 0 0 640 52" stroke="rgba(232,227,218,0.05)" strokeWidth="2" />
+      <path d="M 40 998 A 12 12 0 0 1 52 1010" stroke="rgba(232,227,218,0.05)" strokeWidth="2" />
+      <path d="M 628 1010 A 12 12 0 0 1 640 998" stroke="rgba(232,227,218,0.05)" strokeWidth="2" />
+    </svg>
   </div>
 );
 
@@ -21,42 +67,57 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        <img src={heroBg} alt="Chuteiras de futebol" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-foreground/80 via-foreground/50 to-transparent" />
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#1A2F23]">
+        {/* Radial gradient overlay */}
+        <div className="absolute inset-0 z-0" style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(123,175,142,0.08), transparent 45%)' }} />
+
+        {/* Football field background */}
+        <FootballField />
+
+        {/* Hero content */}
         <div className="relative z-10 text-center px-4">
           <motion.h1
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="text-5xl md:text-7xl lg:text-8xl font-black tracking-[0.25em] text-card uppercase mb-6"
+            className="text-6xl md:text-7xl font-extrabold tracking-[16px] text-[#E8E3DA] uppercase"
           >
             NOVANT
           </motion.h1>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="w-9 h-[1.5px] bg-[#7BAF8E] mx-auto my-5"
+          />
+
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-base md:text-lg text-card/70 font-light tracking-widest mb-10"
+            transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="text-xs font-light tracking-[7px] uppercase text-[#E8E3DA]/30"
           >
-            Equipamento para os 90 minutos
+            Every Minute Counts
           </motion.p>
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.8, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-10"
           >
             <Link to="/catalogo">
-              <Button className="bg-accent text-accent-foreground hover:bg-accent/90 text-xs font-semibold uppercase tracking-[0.2em] px-10 py-6 rounded-none">
-                Ver Catálogo <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <button className="border border-[#E8E3DA]/10 text-[#E8E3DA] text-[10px] tracking-[4px] uppercase font-medium px-10 py-3 rounded-none bg-transparent hover:border-[#7BAF8E] hover:text-[#7BAF8E] transition-all duration-300">
+                Explorar Catálogo
+              </button>
             </Link>
           </motion.div>
         </div>
       </section>
 
       {/* Categories */}
-      <section className="py-24 bg-background">
+      <section className="py-20 bg-[#f8f7f4]">
         <div className="container mx-auto px-4">
           <SectionTitle>Categorias</SectionTitle>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -67,12 +128,12 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: i * 0.1 }}
-                className="group relative aspect-[3/4] overflow-hidden cursor-pointer"
+                className="group relative aspect-[3/4] overflow-hidden cursor-pointer rounded-lg"
               >
                 <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-foreground/40 group-hover:bg-foreground/55 transition-colors duration-500" />
+                <div className="absolute inset-0 bg-[#1A2F23]/40 group-hover:bg-[#1A2F23]/60 transition-colors duration-500" />
                 <div className="absolute inset-0 flex items-end p-5">
-                  <h3 className="text-card font-bold text-sm uppercase tracking-[0.12em]">{cat.name}</h3>
+                  <h3 className="text-white font-bold text-sm uppercase tracking-[3px]">{cat.name}</h3>
                 </div>
               </motion.div>
             ))}
@@ -80,21 +141,20 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section className="py-24 bg-muted">
+      {/* Featured Products / Launches */}
+      <section className="py-20 bg-[#f8f7f4]">
         <div className="container mx-auto px-4">
           <div className="flex items-end justify-between mb-16">
             <div>
-              <h2 className="text-2xl font-extrabold text-foreground uppercase tracking-[0.15em]">
+              <h2 className="text-[10px] font-extrabold text-[#aaaaaa] uppercase tracking-[5px]">
                 Lançamentos
               </h2>
-              <div className="w-16 h-0.5 bg-primary mt-4" />
             </div>
-            <Link to="/catalogo" className="text-[11px] font-medium text-primary hover:text-primary-hover uppercase tracking-[0.15em] flex items-center gap-1">
+            <Link to="/catalogo" className="text-[10px] font-normal text-[#1A2F23] opacity-40 hover:opacity-100 uppercase tracking-[2.5px] flex items-center gap-1 transition-opacity duration-300">
               Ver todos <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-8">
             {featuredProducts.slice(0, 8).map((product, i) => (
               <motion.div
                 key={product.id}
@@ -111,17 +171,17 @@ const Index = () => {
       </section>
 
       {/* Promo Banner */}
-      <section className="bg-primary py-5">
-        <div className="container mx-auto px-4 flex items-center justify-center gap-3 text-primary-foreground">
-          <Truck className="h-5 w-5" strokeWidth={1.5} />
-          <p className="text-[11px] md:text-xs font-semibold uppercase tracking-[0.2em]">
-            Frete grátis em compras acima de R$ 299,00
+      <section className="bg-[#1A2F23] py-4">
+        <div className="container mx-auto px-4 flex items-center justify-center gap-3">
+          <Truck className="h-4 w-4 text-[#E8E3DA]" strokeWidth={1.5} />
+          <p className="text-[10px] text-[#E8E3DA] font-medium uppercase tracking-[4px]">
+            Frete grátis acima de R$299
           </p>
         </div>
       </section>
 
       {/* Brands */}
-      <section className="py-24 bg-background">
+      <section className="py-20 bg-[#f8f7f4]">
         <div className="container mx-auto px-4">
           <SectionTitle>Nossas Marcas</SectionTitle>
           <div className="flex flex-wrap items-center justify-center gap-12 md:gap-16">
@@ -132,7 +192,7 @@ const Index = () => {
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="text-2xl md:text-3xl font-black text-muted-foreground/30 hover:text-foreground transition-colors duration-500 cursor-pointer tracking-[0.15em] uppercase select-none"
+                className="text-2xl md:text-3xl font-extrabold text-[#1A2F23]/15 hover:text-[#1A2F23] transition-colors duration-500 cursor-pointer tracking-[5px] uppercase select-none grayscale hover:grayscale-0"
               >
                 {brand}
               </motion.span>
