@@ -36,26 +36,26 @@ const Navbar = () => {
 
         {/* Center nav links */}
         <div className="hidden md:flex items-center gap-10">
-          <Link to="/" className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] opacity-40 hover:opacity-100 transition-opacity duration-300">Home</Link>
-          <Link to="/catalogo" className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] opacity-40 hover:opacity-100 transition-opacity duration-300">Catálogo</Link>
-          <Link to="/sobre" className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] opacity-40 hover:opacity-100 transition-opacity duration-300">Sobre Nós</Link>
+          <Link to="/" className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] opacity-60 hover:opacity-100 transition-opacity duration-300">Home</Link>
+          <Link to="/catalogo" className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] opacity-60 hover:opacity-100 transition-opacity duration-300">Catálogo</Link>
+          <Link to="/sobre" className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] opacity-60 hover:opacity-100 transition-opacity duration-300">Sobre Nós</Link>
         </div>
 
         {/* Right icons */}
         <div className="hidden md:flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-35 hover:opacity-100 hover:bg-transparent">
+          <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-55 hover:opacity-100 hover:bg-transparent">
             <Search className="h-[18px] w-[18px]" strokeWidth={1.5} />
           </Button>
-          <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-35 hover:opacity-100 hover:bg-transparent">
+          <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-55 hover:opacity-100 hover:bg-transparent">
             <Heart className="h-[18px] w-[18px]" strokeWidth={1.5} />
           </Button>
-          <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-35 hover:opacity-100 hover:bg-transparent relative">
+          <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-55 hover:opacity-100 hover:bg-transparent relative">
             <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.5} />
           </Button>
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-35 hover:opacity-100 hover:bg-transparent">
+                <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-55 hover:opacity-100 hover:bg-transparent">
                   <div className="h-7 w-7 bg-[#1A2F23] flex items-center justify-center">
                     <span className="text-[10px] font-bold text-[#E8E3DA]">
                       {(user.user_metadata?.full_name || user.email || 'U').charAt(0).toUpperCase()}
@@ -81,7 +81,7 @@ const Navbar = () => {
             </DropdownMenu>
           ) : (
             <Link to="/login">
-              <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-35 hover:opacity-100 hover:bg-transparent">
+              <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-55 hover:opacity-100 hover:bg-transparent">
                 <User className="h-[18px] w-[18px]" strokeWidth={1.5} />
               </Button>
             </Link>
@@ -102,9 +102,9 @@ const Navbar = () => {
             <Link to="/catalogo" onClick={() => setMobileOpen(false)} className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] py-3 border-b border-[#eae7e0]">Catálogo</Link>
             <Link to="/sobre" onClick={() => setMobileOpen(false)} className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] py-3 border-b border-[#eae7e0]">Sobre Nós</Link>
             <div className="flex items-center gap-5 pt-4">
-              <Search className="h-5 w-5 text-[#1A2F23] opacity-35" strokeWidth={1.5} />
-              <Heart className="h-5 w-5 text-[#1A2F23] opacity-35" strokeWidth={1.5} />
-              <ShoppingBag className="h-5 w-5 text-[#1A2F23] opacity-35" strokeWidth={1.5} />
+              <Search className="h-5 w-5 text-[#1A2F23] opacity-55" strokeWidth={1.5} />
+              <Heart className="h-5 w-5 text-[#1A2F23] opacity-55" strokeWidth={1.5} />
+              <ShoppingBag className="h-5 w-5 text-[#1A2F23] opacity-55" strokeWidth={1.5} />
               {user ? (
                 <button onClick={handleSignOut} className="ml-auto text-[10px] uppercase tracking-[2.5px] text-destructive font-medium">Sair</button>
               ) : (

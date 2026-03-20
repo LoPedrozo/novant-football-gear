@@ -1,10 +1,17 @@
 import { Link } from 'react-router-dom';
-import { Instagram, Facebook, Twitter } from 'lucide-react';
+import { Instagram, Facebook, Twitter, Truck } from 'lucide-react';
 
 const Footer = () => {
   return (
     <footer className="bg-[#1A2F23]">
       <div className="container mx-auto px-4 py-16">
+        {/* Frete Banner */}
+        <div className="flex items-center justify-center gap-3 pb-10 mb-10 border-b border-[#E8E3DA]/5">
+          <Truck className="h-4 w-4 text-[#7BAF8E]" strokeWidth={1.5} />
+          <p className="text-[10px] text-[#E8E3DA]/40 font-medium uppercase tracking-[4px]">
+            Frete grátis acima de R$299
+          </p>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand */}
           <div>
