@@ -200,7 +200,7 @@ export const products: Product[] = [
     original_price: 1399.90,
     brand: 'Nike',
     category: 'campo',
-    image_url: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&h=400&fit=crop',
+    image_url: 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=400&h=400&fit=crop',
     rating: 4.9,
     reviews_count: 267,
     sizes: ['35', '36', '37', '38', '39', '40'],
