@@ -2,7 +2,7 @@ import mercurialVapor from '@/assets/products/mercurial-vapor.jpg';
 import predatorEdge from '@/assets/products/predator-edge.jpg';
 import futureUltimate from '@/assets/products/future-ultimate.jpg';
 import furonV7 from '@/assets/products/furon-v7.jpg';
-import velocitaVi from '@/assets/products/velocita-vi.jpg';
+
 import reactGato from '@/assets/products/react-gato.jpg';
 import topSala from '@/assets/products/top-sala.jpg';
 import futurePlay from '@/assets/products/future-play.jpg';
@@ -97,22 +97,6 @@ export const products: Product[] = [
     colors: ['Branco', 'Preto'],
     in_stock: true,
     featured: false,
-  },
-  {
-    id: '5',
-    name: 'Velocita VI Pro',
-    description: 'Chuteira de campo com design clássico e moderno',
-    price: 649.90,
-    original_price: 799.90,
-    brand: 'Umbro',
-    category: 'campo',
-    image_url: velocitaVi,
-    rating: 4.3,
-    reviews_count: 67,
-    sizes: ['38', '39', '40', '41', '42', '43'],
-    colors: ['Preto', 'Azul'],
-    in_stock: true,
-    featured: true,
   },
   {
     id: '6',
@@ -235,4 +219,4 @@ export const categories = [
   { name: 'Acessórios', slug: 'acessorios', image: catAcessorios },
 ];
 
-export const brands = ['Nike', 'Adidas', 'Puma', 'New Balance', 'Umbro'];
+export const brands = ['Nike', 'Adidas', 'Puma', 'New Balance'];

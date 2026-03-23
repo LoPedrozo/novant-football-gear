@@ -38,7 +38,8 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-10">
           <Link to="/" className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] opacity-60 hover:opacity-100 transition-opacity duration-300">Home</Link>
           <Link to="/catalogo" className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] opacity-60 hover:opacity-100 transition-opacity duration-300">Catálogo</Link>
-          <Link to="/sobre" className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] opacity-60 hover:opacity-100 transition-opacity duration-300">Sobre Nós</Link>
+          <Link to="/destaques" className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] opacity-60 hover:opacity-100 transition-opacity duration-300">Destaques</Link>
+          <Link to="/contato" className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] opacity-60 hover:opacity-100 transition-opacity duration-300">Contato</Link>
         </div>
 
         {/* Right icons */}
@@ -100,7 +101,8 @@ const Navbar = () => {
           <div className="flex flex-col p-8 gap-6">
             <Link to="/" onClick={() => setMobileOpen(false)} className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] py-3 border-b border-[#eae7e0]">Home</Link>
             <Link to="/catalogo" onClick={() => setMobileOpen(false)} className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] py-3 border-b border-[#eae7e0]">Catálogo</Link>
-            <Link to="/sobre" onClick={() => setMobileOpen(false)} className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] py-3 border-b border-[#eae7e0]">Sobre Nós</Link>
+            <Link to="/destaques" onClick={() => setMobileOpen(false)} className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] py-3 border-b border-[#eae7e0]">Destaques</Link>
+            <Link to="/contato" onClick={() => setMobileOpen(false)} className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] py-3 border-b border-[#eae7e0]">Contato</Link>
             <div className="flex items-center gap-5 pt-4">
               <Search className="h-5 w-5 text-[#1A2F23] opacity-55" strokeWidth={1.5} />
               <Heart className="h-5 w-5 text-[#1A2F23] opacity-55" strokeWidth={1.5} />
