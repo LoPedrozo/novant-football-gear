@@ -149,39 +149,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* A Novant */}
-      <section className="py-20 bg-[#1A2F23]">
-        <div className="container mx-auto px-4 max-w-2xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-          >
-            <h2 className="text-[10px] font-extrabold text-[#7BAF8E] uppercase tracking-[5px] mb-8">A Novant</h2>
-            <p className="text-sm text-[#E8E3DA]/40 leading-[2] font-light">
-              Nosso nome vem do italiano <span className="text-[#E8E3DA]/70 font-medium">"novanta"</span> — noventa.
-              Uma homenagem a cada minuto de dedicação dentro e fora de campo.
-              Selecionamos os melhores produtos das maiores marcas do mundo
-              para equipar jogadores de todos os níveis.
-            </p>
-            <div className="flex items-center justify-center gap-12 mt-10">
-              <div className="text-center">
-                <span className="text-[8px] font-semibold text-[#7BAF8E] uppercase tracking-[3px]">Qualidade</span>
-              </div>
-              <div className="w-[1px] h-4 bg-[#E8E3DA]/10" />
-              <div className="text-center">
-                <span className="text-[8px] font-semibold text-[#7BAF8E] uppercase tracking-[3px]">Autenticidade</span>
-              </div>
-              <div className="w-[1px] h-4 bg-[#E8E3DA]/10" />
-              <div className="text-center">
-                <span className="text-[8px] font-semibold text-[#7BAF8E] uppercase tracking-[3px]">Paixão</span>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
       {/* Brands */}
       <section className="py-20 bg-[#f8f7f4]">
         <div className="container mx-auto px-4">
