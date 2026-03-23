@@ -150,10 +150,12 @@ const Index = () => {
       </section>
 
       {/* Brands */}
-      <section className="py-20 bg-[#f8f7f4]">
-        <div className="container mx-auto px-4">
-          <SectionTitle>Nossas Marcas</SectionTitle>
-          <div className="flex flex-wrap items-center justify-center gap-12 md:gap-16">
+      <section className="py-16 bg-[#f8f7f4]">
+        <div className="max-w-4xl mx-auto px-4">
+          <h2 className="text-sm font-semibold text-[#1A2F23]/30 uppercase tracking-[5px] text-center mb-10">
+            Nossas Marcas
+          </h2>
+          <div className="flex flex-wrap items-center justify-center gap-16 md:gap-20">
             {[
               { name: 'Nike', slug: 'nike' },
               { name: 'Adidas', slug: 'adidas' },
@@ -166,15 +168,12 @@ const Index = () => {
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="flex items-center justify-center cursor-pointer opacity-15 hover:opacity-70 grayscale hover:grayscale-0 transition-all duration-500"
+                className="flex items-center justify-center cursor-pointer opacity-40 hover:opacity-70 transition-opacity duration-300"
               >
                 <img
                   src={`https://cdn.simpleicons.org/${brand.slug}/1A2F23`}
                   alt={brand.name}
-                  className="h-8 md:h-10 w-auto object-contain"
-                  style={{ filter: 'brightness(0) opacity(0.3)' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.filter = 'brightness(0) opacity(0.8)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.filter = 'brightness(0) opacity(0.3)')}
+                  className="h-12 md:h-14 w-auto object-contain"
                 />
               </motion.div>
             ))}

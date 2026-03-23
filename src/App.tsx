@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Index from "./pages/Index";
 import Catalog from "./pages/Catalog";
+
 import Highlights from "./pages/Highlights";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
@@ -26,6 +27,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/catalogo" element={<Catalog />} />
+            {/* <Route path="/produto/:id" element={<ProductDetail />} /> */}
             <Route path="/destaques" element={<Highlights />} />
             <Route path="/contato" element={<Contact />} />
             <Route path="/login" element={<Login />} />
