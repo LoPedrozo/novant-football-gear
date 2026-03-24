@@ -1,6 +1,7 @@
 import { createContext, useContext, useReducer, useEffect, useState, useCallback, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { resolveProductImage } from '@/lib/productImages';
 
 export type WishlistItem = {
   id: string;
@@ -9,6 +10,19 @@ export type WishlistItem = {
   image_url: string;
   price: number;
   original_price?: number;
+};
+
+type WishlistRow = {
+  product_id: string;
+};
+
+type WishlistProductPreview = {
+  id: string;
+  name: string;
+  brand: string;
+  image_url: string | null;
+  price: number;
+  original_price: number | null;
 };
 
 type WishlistAction =
@@ -42,6 +56,7 @@ function loadFromStorage(): WishlistItem[] {
   } catch (error) {
     console.error('[WishlistContext] Failed to read wishlist from localStorage:', error);
   }
+
   return [];
 }
 
@@ -94,64 +109,170 @@ function wishlistReducer(state: WishlistItem[], action: WishlistAction): Wishlis
   }
 }
 
-const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
+function mapWishlistProductToItem(product: WishlistProductPreview): WishlistItem {
+  return {
+    id: product.id,
+    name: product.name,
+    brand: product.brand,
+    image_url: resolveProductImage(product.image_url),
+    price: product.price,
+    original_price: product.original_price ?? undefined,
+  };
+}
 
-// Supabase helpers
-async function fetchSupabaseWishlist(userId: string): Promise<WishlistItem[]> {
+async function fetchWishlistProducts(productIds: string[]) {
+  if (productIds.length === 0) {
+    return new Map<string, WishlistProductPreview>();
+  }
+
+  console.log('[WishlistContext] Fetching product details for wishlist rows.', { productIds });
+
+  const { data, error } = await supabase
+    .from('products')
+    .select('id, name, brand, image_url, price, original_price')
+    .in('id', productIds);
+
+  if (error) {
+    console.error('[WishlistContext] Failed to fetch products for wishlist rows:', error);
+    throw error;
+  }
+
+  console.log('[WishlistContext] Product details fetched for wishlist rows.', { count: data?.length ?? 0 });
+
+  return new Map<string, WishlistProductPreview>((data ?? []).map((product) => [product.id, product]));
+}
+
+async function fetchWishlistRows(userId: string): Promise<WishlistRow[]> {
+  console.log('[WishlistContext] Fetching wishlist rows from Supabase.', { userId });
+
   const { data, error } = await (supabase as any)
     .from('wishlists')
-    .select('product_id, product_data')
+    .select('product_id')
     .eq('user_id', userId);
+
   if (error) {
-    console.error(`[WishlistContext] Failed to fetch wishlist from Supabase for user ${userId}:`, error);
+    console.error('[WishlistContext] Failed to fetch wishlist rows from Supabase:', { userId, error });
     throw error;
   }
-  return (data || [])
-    .map((row: any) => row.product_data as WishlistItem | null)
+
+  console.log('[WishlistContext] Wishlist rows fetched from Supabase.', { userId, count: data?.length ?? 0 });
+
+  return (data ?? []) as WishlistRow[];
+}
+
+async function fetchSupabaseWishlist(userId: string): Promise<WishlistItem[]> {
+  const rows = await fetchWishlistRows(userId);
+
+  if (rows.length === 0) {
+    console.log('[WishlistContext] No wishlist rows found for user.', { userId });
+    return [];
+  }
+
+  const productIds = [...new Set(rows.map((row) => row.product_id))];
+  const productsById = await fetchWishlistProducts(productIds);
+  const items = rows
+    .map((row) => {
+      const product = productsById.get(row.product_id);
+
+      if (!product) {
+        console.warn('[WishlistContext] Product referenced by wishlist row was not found.', { userId, productId: row.product_id });
+        return null;
+      }
+
+      return mapWishlistProductToItem(product);
+    })
     .filter((item: WishlistItem | null): item is WishlistItem => Boolean(item));
+
+  console.log('[WishlistContext] Wishlist hydrated from Supabase.', { userId, count: items.length });
+
+  return items;
 }
 
-async function upsertSupabaseItems(userId: string, items: WishlistItem[]) {
-  if (items.length === 0) return;
+async function insertSupabaseWishlistItem(userId: string, item: WishlistItem) {
+  console.log('[WishlistContext] addItem -> checking existing wishlist row in Supabase.', {
+    userId,
+    productId: item.id,
+  });
 
-  const payload = items.map((item) => ({
-    user_id: userId,
-    product_id: item.id,
-    product_data: item,
-  }));
-
-  const { error } = await (supabase as any)
+  const { data: existingRow, error: existingError } = await (supabase as any)
     .from('wishlists')
-    .upsert(payload, { onConflict: 'user_id,product_id' });
+    .select('product_id')
+    .eq('user_id', userId)
+    .eq('product_id', item.id)
+    .maybeSingle();
 
-  if (error) {
-    console.error(`[WishlistContext] Failed to migrate wishlist items to Supabase for user ${userId}:`, error);
-    throw error;
+  if (existingError) {
+    console.error('[WishlistContext] Failed to check existing wishlist row:', {
+      userId,
+      productId: item.id,
+      error: existingError,
+    });
+    throw existingError;
   }
+
+  if (existingRow) {
+    console.log('[WishlistContext] addItem -> wishlist row already exists, skipping insert.', {
+      userId,
+      productId: item.id,
+    });
+    return;
+  }
+
+  console.log('[WishlistContext] addItem -> inserting wishlist row into Supabase.', {
+    userId,
+    productId: item.id,
+  });
+
+  const { error: insertError } = await (supabase as any)
+    .from('wishlists')
+    .insert({
+      user_id: userId,
+      product_id: item.id,
+    });
+
+  if (insertError) {
+    console.error('[WishlistContext] Failed to insert wishlist row into Supabase:', {
+      userId,
+      productId: item.id,
+      error: insertError,
+    });
+    throw insertError;
+  }
+
+  console.log('[WishlistContext] addItem -> wishlist row inserted successfully.', {
+    userId,
+    productId: item.id,
+  });
 }
 
-async function upsertSupabaseItem(userId: string, item: WishlistItem) {
-  const { error } = await (supabase as any).from('wishlists').upsert(
-    { user_id: userId, product_id: item.id, product_data: item },
-    { onConflict: 'user_id,product_id' }
-  );
-  if (error) {
-    console.error(`[WishlistContext] Failed to upsert wishlist item for user ${userId}:`, error);
-    throw error;
-  }
-}
+async function deleteSupabaseWishlistItem(userId: string, productId: string) {
+  console.log('[WishlistContext] removeItem -> deleting wishlist row from Supabase.', {
+    userId,
+    productId,
+  });
 
-async function deleteSupabaseItem(userId: string, productId: string) {
   const { error } = await (supabase as any)
     .from('wishlists')
     .delete()
     .eq('user_id', userId)
     .eq('product_id', productId);
+
   if (error) {
-    console.error(`[WishlistContext] Failed to delete wishlist item for user ${userId}:`, error);
+    console.error('[WishlistContext] Failed to delete wishlist row from Supabase:', {
+      userId,
+      productId,
+      error,
+    });
     throw error;
   }
+
+  console.log('[WishlistContext] removeItem -> wishlist row deleted successfully.', {
+    userId,
+    productId,
+  });
 }
+
+const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
 export const WishlistProvider = ({ children }: { children: ReactNode }) => {
   const { user, loading: authLoading } = useAuth();
@@ -167,38 +288,55 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
     let cancelled = false;
 
     const syncWishlist = async () => {
+      console.log('[WishlistContext] Starting wishlist sync.', { userId: user?.id ?? null });
+
       if (user) {
         try {
-          const remoteItems = await fetchSupabaseWishlist(user.id);
-
-          if (cancelled) return;
-
+          let nextItems = await fetchSupabaseWishlist(user.id);
           const guestItems = loadFromStorage();
-          let nextItems = remoteItems;
 
           if (guestItems.length > 0) {
-            nextItems = mergeWishlistItems(remoteItems, guestItems);
-            await upsertSupabaseItems(user.id, nextItems);
+            console.log('[WishlistContext] Migrating guest wishlist items to Supabase.', {
+              userId: user.id,
+              count: guestItems.length,
+            });
 
-            if (cancelled) return;
+            for (const guestItem of guestItems) {
+              await insertSupabaseWishlistItem(user.id, guestItem);
+            }
 
             clearStorage();
+            nextItems = mergeWishlistItems(await fetchSupabaseWishlist(user.id), []);
           }
 
-          dispatch({ type: 'SET_ITEMS', payload: nextItems });
+          if (!cancelled) {
+            dispatch({ type: 'SET_ITEMS', payload: nextItems });
+          }
         } catch (error) {
-          console.error(`[WishlistContext] Failed to hydrate wishlist for user ${user.id}:`, error);
-          dispatch({ type: 'SET_ITEMS', payload: [] });
+          console.error('[WishlistContext] Failed to hydrate wishlist for authenticated user:', {
+            userId: user.id,
+            error,
+          });
+
+          if (!cancelled) {
+            dispatch({ type: 'SET_ITEMS', payload: [] });
+          }
         } finally {
           if (!cancelled) {
             setHydratedKey(user.id);
           }
         }
+
         return;
       }
 
-      dispatch({ type: 'SET_ITEMS', payload: loadFromStorage() });
-      setHydratedKey(GUEST_SYNC_KEY);
+      const guestItems = loadFromStorage();
+      console.log('[WishlistContext] Hydrating guest wishlist from localStorage.', { count: guestItems.length });
+
+      if (!cancelled) {
+        dispatch({ type: 'SET_ITEMS', payload: guestItems });
+        setHydratedKey(GUEST_SYNC_KEY);
+      }
     };
 
     void syncWishlist();
@@ -215,31 +353,40 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
   }, [items, user, authLoading, hydratedKey]);
 
   const addItem = useCallback((item: WishlistItem) => {
+    console.log('[WishlistContext] addItem called.', { userId: user?.id ?? null, item });
     dispatch({ type: 'ADD_ITEM', payload: item });
 
     if (user) {
-      void upsertSupabaseItem(user.id, item).catch((error) => {
-        console.error(`[WishlistContext] Failed to sync added wishlist item for user ${user.id}:`, error);
+      void insertSupabaseWishlistItem(user.id, item).catch((error) => {
+        console.error('[WishlistContext] addItem sync failed:', { userId: user.id, item, error });
       });
+      return;
     }
+
+    console.log('[WishlistContext] addItem executed for guest user. Persistence will remain in localStorage.');
   }, [user]);
 
   const removeItem = useCallback((id: string) => {
+    console.log('[WishlistContext] removeItem called.', { userId: user?.id ?? null, productId: id });
     dispatch({ type: 'REMOVE_ITEM', payload: id });
 
     if (user) {
-      void deleteSupabaseItem(user.id, id).catch((error) => {
-        console.error(`[WishlistContext] Failed to sync removed wishlist item for user ${user.id}:`, error);
+      void deleteSupabaseWishlistItem(user.id, id).catch((error) => {
+        console.error('[WishlistContext] removeItem sync failed:', { userId: user.id, productId: id, error });
       });
+      return;
     }
+
+    console.log('[WishlistContext] removeItem executed for guest user. Persistence will remain in localStorage.');
   }, [user]);
 
   const toggleItem = useCallback((item: WishlistItem) => {
     if (items.some((i) => i.id === item.id)) {
       removeItem(item.id);
-    } else {
-      addItem(item);
+      return;
     }
+
+    addItem(item);
   }, [items, addItem, removeItem]);
 
   const isInWishlist = useCallback((id: string) => {
