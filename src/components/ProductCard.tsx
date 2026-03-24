@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
+import { resolveProductImage } from '@/lib/productImages';
 
 interface ProductCardProps {
   product: {
@@ -24,7 +25,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         {/* Image */}
         <div className="relative aspect-square overflow-hidden bg-[#f2efea]">
           <img
-            src={product.image_url || ''}
+            src={resolveProductImage(product.image_url)}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />

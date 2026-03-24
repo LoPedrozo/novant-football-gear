@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Star, Heart, Loader2, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { resolveProductImage } from '@/lib/productImages';
 import ProductCard from '@/components/ProductCard';
 
 const ProductDetail = () => {
@@ -32,7 +33,7 @@ const ProductDetail = () => {
       }
 
       setProduct(data);
-      setMainImage(data.image_url || '');
+      setMainImage(resolveProductImage(data.image_url));
       if (data.sizes?.length) setSelectedSize(data.sizes[0]);
       if (data.colors?.length) setSelectedColor(data.colors[0]);
 
@@ -119,30 +120,6 @@ const ProductDetail = () => {
                 className="w-full h-full object-cover"
               />
             </div>
-            {/* Thumbnails if images array exists */}
-            {product.images && product.images.length > 0 && (
-              <div className="flex gap-3 mt-4">
-                <button
-                  onClick={() => setMainImage(product.image_url || '')}
-                  className={`w-20 h-20 overflow-hidden rounded-lg border-2 transition-colors duration-200 ${
-                    mainImage === product.image_url ? 'border-[#1A2F23]' : 'border-[#eae7e0]'
-                  }`}
-                >
-                  <img src={product.image_url || ''} alt="" className="w-full h-full object-cover" />
-                </button>
-                {product.images.map((img: string, i: number) => (
-                  <button
-                    key={i}
-                    onClick={() => setMainImage(img)}
-                    className={`w-20 h-20 overflow-hidden rounded-lg border-2 transition-colors duration-200 ${
-                      mainImage === img ? 'border-[#1A2F23]' : 'border-[#eae7e0]'
-                    }`}
-                  >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Info column — 40% */}
