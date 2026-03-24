@@ -13,6 +13,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Highlights from "./pages/Highlights";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
+import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/destaques" element={<Highlights />} />
               <Route path="/contato" element={<Contact />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Footer />

@@ -12,7 +12,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { signInWithEmail, signUpWithEmail } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,9 +20,11 @@ const Login = () => {
     setLoading(true);
     try {
       if (isRegister) {
-        await signUp(email, password, name);
+        await signUpWithEmail(email, password, name);
+        toast.success('Conta criada! Verifique seu email para confirmar.');
       } else {
-        await signIn(email, password);
+        await signInWithEmail(email, password);
+        toast.success('Bem-vindo à Novant!');
         navigate('/');
       }
     } catch (error: any) {

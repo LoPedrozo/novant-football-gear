@@ -6,11 +6,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import CartDrawer from '@/components/CartDrawer';
+import AuthModal from '@/components/AuthModal';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const { user, signOut } = useAuth();
   const { totalItems, openCart } = useCart();
   const navigate = useNavigate();
@@ -23,8 +26,11 @@ const Navbar = () => {
 
   const handleSignOut = async () => {
     await signOut();
+    toast.success('Até logo!');
     navigate('/');
   };
+
+  const displayName = user?.user_metadata?.full_name || user?.email || '';
 
   return (
     <nav className={cn(
@@ -67,20 +73,21 @@ const Navbar = () => {
                 <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-55 hover:opacity-100 hover:bg-transparent">
                   <div className="h-7 w-7 bg-[#1A2F23] flex items-center justify-center">
                     <span className="text-[10px] font-bold text-[#E8E3DA]">
-                      {(user.user_metadata?.full_name || user.email || 'U').charAt(0).toUpperCase()}
+                      {(displayName || 'U').charAt(0).toUpperCase()}
                     </span>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 rounded-none">
-                <DropdownMenuItem className="flex items-center gap-2 text-xs uppercase tracking-wider">
+                <div className="px-2 py-1.5 text-[10px] text-[#aaaaaa] uppercase tracking-wider truncate">
+                  {displayName}
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => toast('Em breve!')} className="flex items-center gap-2 text-xs uppercase tracking-wider">
                   <UserCircle className="h-4 w-4" /> Meu Perfil
                 </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2 text-xs uppercase tracking-wider">
+                <DropdownMenuItem onClick={() => toast('Em breve!')} className="flex items-center gap-2 text-xs uppercase tracking-wider">
                   <Package className="h-4 w-4" /> Meus Pedidos
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2 text-xs uppercase tracking-wider">
-                  <Heart className="h-4 w-4" /> Favoritos
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 text-xs uppercase tracking-wider text-destructive">
@@ -89,11 +96,9 @@ const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link to="/login">
-              <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-55 hover:opacity-100 hover:bg-transparent">
-                <User className="h-[18px] w-[18px]" strokeWidth={1.5} />
-              </Button>
-            </Link>
+            <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-55 hover:opacity-100 hover:bg-transparent" onClick={() => setAuthModalOpen(true)}>
+              <User className="h-[18px] w-[18px]" strokeWidth={1.5} />
+            </Button>
           )}
         </div>
 
@@ -123,9 +128,9 @@ const Navbar = () => {
                 )}
               </button>
               {user ? (
-                <button onClick={handleSignOut} className="ml-auto text-[10px] uppercase tracking-[2.5px] text-destructive font-medium">Sair</button>
+                <button onClick={() => { setMobileOpen(false); handleSignOut(); }} className="ml-auto text-[10px] uppercase tracking-[2.5px] text-destructive font-medium">Sair</button>
               ) : (
-                <Link to="/login" onClick={() => setMobileOpen(false)} className="ml-auto text-[10px] uppercase tracking-[2.5px] text-[#1A2F23] font-medium">Entrar</Link>
+                <button onClick={() => { setMobileOpen(false); setAuthModalOpen(true); }} className="ml-auto text-[10px] uppercase tracking-[2.5px] text-[#1A2F23] font-medium">Entrar</button>
               )}
             </div>
           </div>
@@ -133,6 +138,7 @@ const Navbar = () => {
       )}
 
       <CartDrawer />
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </nav>
   );
 };
