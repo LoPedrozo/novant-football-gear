@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 import CartDrawer from '@/components/CartDrawer';
 import AuthModal from '@/components/AuthModal';
 import { toast } from 'sonner';
@@ -16,6 +17,7 @@ const Navbar = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const { user, signOut } = useAuth();
   const { totalItems, openCart } = useCart();
+  const { totalItems: wishlistCount } = useWishlist();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -56,9 +58,14 @@ const Navbar = () => {
           <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-55 hover:opacity-100 hover:bg-transparent">
             <Search className="h-[18px] w-[18px]" strokeWidth={1.5} />
           </Button>
-          <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-55 hover:opacity-100 hover:bg-transparent">
+          <Link to="/favoritos" className="relative inline-flex items-center justify-center h-9 w-9 text-[#1A2F23] opacity-55 hover:opacity-100 transition-opacity">
             <Heart className="h-[18px] w-[18px]" strokeWidth={1.5} />
-          </Button>
+            {wishlistCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 h-4 w-4 flex items-center justify-center bg-[#1A2F23] text-white text-[9px] font-bold rounded-full">
+                {wishlistCount}
+              </span>
+            )}
+          </Link>
           <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-55 hover:opacity-100 hover:bg-transparent relative" onClick={openCart}>
             <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.5} />
             {totalItems > 0 && (
@@ -118,7 +125,14 @@ const Navbar = () => {
             <Link to="/contato" onClick={() => setMobileOpen(false)} className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] py-3 border-b border-[#eae7e0]">Contato</Link>
             <div className="flex items-center gap-5 pt-4">
               <Search className="h-5 w-5 text-[#1A2F23] opacity-55" strokeWidth={1.5} />
-              <Heart className="h-5 w-5 text-[#1A2F23] opacity-55" strokeWidth={1.5} />
+              <Link to="/favoritos" onClick={() => setMobileOpen(false)} className="relative">
+                <Heart className="h-5 w-5 text-[#1A2F23] opacity-55" strokeWidth={1.5} />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 h-4 w-4 flex items-center justify-center bg-[#1A2F23] text-white text-[9px] font-bold rounded-full">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
               <button onClick={() => { setMobileOpen(false); openCart(); }} className="relative">
                 <ShoppingBag className="h-5 w-5 text-[#1A2F23] opacity-55" strokeWidth={1.5} />
                 {totalItems > 0 && (

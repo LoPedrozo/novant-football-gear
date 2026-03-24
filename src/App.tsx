@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
+import { WishlistProvider } from "@/contexts/WishlistContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Index from "./pages/Index";
@@ -14,6 +15,7 @@ import Highlights from "./pages/Highlights";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import AuthCallback from "./pages/AuthCallback";
+import Wishlist from "./pages/Wishlist";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,18 +28,21 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <CartProvider>
-            <Navbar />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/catalogo" element={<Catalog />} />
-              <Route path="/produto/:id" element={<ProductDetail />} />
-              <Route path="/destaques" element={<Highlights />} />
-              <Route path="/contato" element={<Contact />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Footer />
+            <WishlistProvider>
+              <Navbar />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/catalogo" element={<Catalog />} />
+                <Route path="/produto/:id" element={<ProductDetail />} />
+                <Route path="/destaques" element={<Highlights />} />
+                <Route path="/contato" element={<Contact />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/favoritos" element={<Wishlist />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Footer />
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </BrowserRouter>

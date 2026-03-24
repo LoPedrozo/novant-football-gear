@@ -5,12 +5,14 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveProductImage } from '@/lib/productImages';
 import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 import { toast } from 'sonner';
 import ProductCard from '@/components/ProductCard';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { addItem, openCart } = useCart();
+  const { toggleItem, isInWishlist } = useWishlist();
   const [product, setProduct] = useState<any>(null);
   const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -101,8 +103,18 @@ const ProductDetail = () => {
     openCart();
   };
 
-  const handleAddToFavorites = () => {
-    console.log('Adicionar aos favoritos:', product.name);
+  const inWishlist = isInWishlist(product.id);
+
+  const handleToggleFavorites = () => {
+    toggleItem({
+      id: product.id,
+      name: product.name,
+      brand: product.brand,
+      image_url: mainImage,
+      price: product.price,
+      original_price: product.original_price ?? undefined,
+    });
+    toast.success(inWishlist ? 'Removido dos favoritos' : 'Adicionado aos favoritos!');
   };
 
   return (
@@ -243,11 +255,14 @@ const ProductDetail = () => {
 
             {/* Add to favorites */}
             <button
-              onClick={handleAddToFavorites}
+              onClick={handleToggleFavorites}
               className="w-full border border-[#eae7e0] text-[#1A2F23] rounded-none text-[10px] uppercase tracking-[4px] font-medium py-4 hover:border-[#7BAF8E] transition-colors duration-300 flex items-center justify-center gap-2"
             >
-              <Heart className="h-4 w-4" strokeWidth={1.5} />
-              Adicionar aos Favoritos
+              <Heart
+                className={`h-4 w-4 transition-colors duration-300 ${inWishlist ? 'fill-red-500 text-red-500' : ''}`}
+                strokeWidth={1.5}
+              />
+              {inWishlist ? 'Remover dos Favoritos' : 'Adicionar aos Favoritos'}
             </button>
           </div>
         </motion.div>
