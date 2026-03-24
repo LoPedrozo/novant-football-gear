@@ -1,14 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ProductCard from '@/components/ProductCard';
-import { products, categories, brands } from '@/lib/mockData';
+import { categories, brands } from '@/lib/mockData';
+import { supabase } from '@/integrations/supabase/client';
 
 const Catalog = () => {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedBrand, setSelectedBrand] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('featured');
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data } = await supabase.from('products').select('*');
+      if (data) setProducts(data);
+      setLoading(false);
+    };
+    fetchProducts();
+  }, []);
 
   let filtered = [...products];
 
@@ -21,7 +33,7 @@ const Catalog = () => {
 
   if (sortBy === 'price-asc') filtered.sort((a, b) => a.price - b.price);
   else if (sortBy === 'price-desc') filtered.sort((a, b) => b.price - a.price);
-  else if (sortBy === 'rating') filtered.sort((a, b) => b.rating - a.rating);
+  else if (sortBy === 'rating') filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
   else filtered.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
 
   return (
@@ -94,11 +106,17 @@ const Catalog = () => {
               <SelectItem value="rating">Melhor avaliação</SelectItem>
             </SelectContent>
           </Select>
-          <span className="text-[10px] text-[#aaaaaa] ml-auto uppercase tracking-[2.5px]">{filtered.length} produtos</span>
+          <span className="text-[10px] text-[#aaaaaa] ml-auto uppercase tracking-[2.5px]">
+            {loading ? '...' : `${filtered.length} produtos`}
+          </span>
         </div>
 
         {/* Products Grid */}
-        {filtered.length > 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-6 w-6 animate-spin text-[#7BAF8E]" />
+          </div>
+        ) : filtered.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-8">
             {filtered.map((product, i) => (
               <motion.div
