@@ -4,12 +4,15 @@ import { Search, Heart, ShoppingBag, User, Menu, X, LogOut, Package, UserCircle 
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
+import CartDrawer from '@/components/CartDrawer';
 import { cn } from '@/lib/utils';
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { user, signOut } = useAuth();
+  const { totalItems, openCart } = useCart();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,8 +53,13 @@ const Navbar = () => {
           <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-55 hover:opacity-100 hover:bg-transparent">
             <Heart className="h-[18px] w-[18px]" strokeWidth={1.5} />
           </Button>
-          <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-55 hover:opacity-100 hover:bg-transparent relative">
+          <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-55 hover:opacity-100 hover:bg-transparent relative" onClick={openCart}>
             <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.5} />
+            {totalItems > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 h-4 w-4 flex items-center justify-center bg-[#1A2F23] text-white text-[9px] font-bold rounded-full">
+                {totalItems}
+              </span>
+            )}
           </Button>
           {user ? (
             <DropdownMenu>
@@ -106,7 +114,14 @@ const Navbar = () => {
             <div className="flex items-center gap-5 pt-4">
               <Search className="h-5 w-5 text-[#1A2F23] opacity-55" strokeWidth={1.5} />
               <Heart className="h-5 w-5 text-[#1A2F23] opacity-55" strokeWidth={1.5} />
-              <ShoppingBag className="h-5 w-5 text-[#1A2F23] opacity-55" strokeWidth={1.5} />
+              <button onClick={() => { setMobileOpen(false); openCart(); }} className="relative">
+                <ShoppingBag className="h-5 w-5 text-[#1A2F23] opacity-55" strokeWidth={1.5} />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 h-4 w-4 flex items-center justify-center bg-[#1A2F23] text-white text-[9px] font-bold rounded-full">
+                    {totalItems}
+                  </span>
+                )}
+              </button>
               {user ? (
                 <button onClick={handleSignOut} className="ml-auto text-[10px] uppercase tracking-[2.5px] text-destructive font-medium">Sair</button>
               ) : (
@@ -116,6 +131,8 @@ const Navbar = () => {
           </div>
         </div>
       )}
+
+      <CartDrawer />
     </nav>
   );
 };

@@ -4,10 +4,13 @@ import { Star, Heart, Loader2, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveProductImage } from '@/lib/productImages';
+import { useCart } from '@/contexts/CartContext';
+import { toast } from 'sonner';
 import ProductCard from '@/components/ProductCard';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const { addItem, openCart } = useCart();
   const [product, setProduct] = useState<any>(null);
   const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,7 +86,19 @@ const ProductDetail = () => {
     : null;
 
   const handleAddToCart = () => {
-    console.log('Adicionar ao carrinho:', { product: product.name, size: selectedSize, color: selectedColor });
+    if (!selectedSize) return;
+    addItem({
+      id: product.id,
+      name: product.name,
+      brand: product.brand,
+      image_url: mainImage,
+      price: product.price,
+      size: selectedSize,
+      color: selectedColor,
+      quantity: 1,
+    });
+    toast.success('Produto adicionado ao carrinho!');
+    openCart();
   };
 
   const handleAddToFavorites = () => {
@@ -213,12 +228,18 @@ const ProductDetail = () => {
             )}
 
             {/* Add to cart */}
-            <button
-              onClick={handleAddToCart}
-              className="w-full bg-[#1A2F23] text-[#E8E3DA] rounded-none text-[10px] uppercase tracking-[4px] font-medium py-4 hover:bg-[#1A2F23]/90 transition-colors duration-300"
-            >
-              Adicionar ao Carrinho
-            </button>
+            <div>
+              <button
+                onClick={handleAddToCart}
+                disabled={!selectedSize}
+                className="w-full bg-[#1A2F23] text-[#E8E3DA] rounded-none text-[10px] uppercase tracking-[4px] font-medium py-4 hover:bg-[#1A2F23]/90 transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Adicionar ao Carrinho
+              </button>
+              {!selectedSize && (
+                <p className="text-[10px] text-[#aaaaaa] mt-2 text-center">Selecione um tamanho</p>
+              )}
+            </div>
 
             {/* Add to favorites */}
             <button

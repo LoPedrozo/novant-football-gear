@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Index from "./pages/Index";
@@ -23,17 +24,19 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/catalogo" element={<Catalog />} />
-            <Route path="/produto/:id" element={<ProductDetail />} />
-            <Route path="/destaques" element={<Highlights />} />
-            <Route path="/contato" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Footer />
+          <CartProvider>
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/catalogo" element={<Catalog />} />
+              <Route path="/produto/:id" element={<ProductDetail />} />
+              <Route path="/destaques" element={<Highlights />} />
+              <Route path="/contato" element={<Contact />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Footer />
+          </CartProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
