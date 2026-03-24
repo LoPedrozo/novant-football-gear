@@ -24,6 +24,7 @@ interface CartContextType {
   items: CartItem[];
   totalItems: number;
   totalPrice: number;
+  loading: boolean;
   addItem: (item: CartItem) => void;
   removeItem: (id: string, size: string, color: string) => void;
   updateQuantity: (id: string, size: string, color: string, quantity: number) => void;
@@ -34,6 +35,7 @@ interface CartContextType {
 }
 
 const STORAGE_KEY = 'novant_cart';
+const GUEST_SYNC_KEY = '__guest_cart__';
 
 function itemKey(id: string, size: string, color: string) {
   return `${id}__${size}__${color}`;
@@ -42,15 +44,54 @@ function itemKey(id: string, size: string, color: string) {
 function loadFromStorage(): CartItem[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return JSON.parse(stored);
-  } catch {}
+    if (!stored) return [];
+
+    const parsed = JSON.parse(stored);
+    if (Array.isArray(parsed)) return parsed as CartItem[];
+
+    console.error('[CartContext] Invalid cart data found in localStorage.');
+  } catch (error) {
+    console.error('[CartContext] Failed to read cart from localStorage:', error);
+  }
   return [];
 }
 
 function saveToStorage(items: CartItem[]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  } catch {}
+  } catch (error) {
+    console.error('[CartContext] Failed to save cart to localStorage:', error);
+  }
+}
+
+function clearStorage() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch (error) {
+    console.error('[CartContext] Failed to clear cart from localStorage:', error);
+  }
+}
+
+function mergeCartItems(remoteItems: CartItem[], guestItems: CartItem[]) {
+  const merged = new Map<string, CartItem>();
+
+  remoteItems.forEach((item) => {
+    merged.set(itemKey(item.id, item.size, item.color), item);
+  });
+
+  guestItems.forEach((item) => {
+    const key = itemKey(item.id, item.size, item.color);
+    const existing = merged.get(key);
+
+    if (existing) {
+      merged.set(key, { ...existing, quantity: existing.quantity + item.quantity });
+      return;
+    }
+
+    merged.set(key, item);
+  });
+
+  return Array.from(merged.values());
 }
 
 function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
@@ -100,10 +141,32 @@ async function fetchSupabaseCart(userId: string): Promise<CartItem[]> {
     .select('item_key, item_data')
     .eq('user_id', userId);
   if (error) {
-    console.warn('[CartContext] Failed to fetch cart from Supabase:', error.message);
+    console.error(`[CartContext] Failed to fetch cart from Supabase for user ${userId}:`, error);
     throw error;
   }
-  return (data || []).map((row: any) => row.item_data as CartItem);
+  return (data || [])
+    .map((row: any) => row.item_data as CartItem | null)
+    .filter((item: CartItem | null): item is CartItem => Boolean(item));
+}
+
+async function upsertSupabaseCartItems(userId: string, items: CartItem[]) {
+  if (items.length === 0) return;
+
+  const payload = items.map((item) => ({
+    user_id: userId,
+    item_key: itemKey(item.id, item.size, item.color),
+    product_id: item.id,
+    item_data: item,
+  }));
+
+  const { error } = await (supabase as any)
+    .from('cart_items')
+    .upsert(payload, { onConflict: 'user_id,item_key' });
+
+  if (error) {
+    console.error(`[CartContext] Failed to migrate cart items to Supabase for user ${userId}:`, error);
+    throw error;
+  }
 }
 
 async function upsertSupabaseCartItem(userId: string, item: CartItem) {
@@ -112,7 +175,10 @@ async function upsertSupabaseCartItem(userId: string, item: CartItem) {
     { user_id: userId, item_key: key, product_id: item.id, item_data: item },
     { onConflict: 'user_id,item_key' }
   );
-  if (error) console.warn('[CartContext] Failed to upsert cart item:', error.message);
+  if (error) {
+    console.error(`[CartContext] Failed to upsert cart item for user ${userId}:`, error);
+    throw error;
+  }
 }
 
 async function deleteSupabaseCartItem(userId: string, id: string, size: string, color: string) {
@@ -122,7 +188,10 @@ async function deleteSupabaseCartItem(userId: string, id: string, size: string, 
     .delete()
     .eq('user_id', userId)
     .eq('item_key', key);
-  if (error) console.warn('[CartContext] Failed to delete cart item:', error.message);
+  if (error) {
+    console.error(`[CartContext] Failed to delete cart item for user ${userId}:`, error);
+    throw error;
+  }
 }
 
 async function clearSupabaseCart(userId: string) {
@@ -130,7 +199,10 @@ async function clearSupabaseCart(userId: string) {
     .from('cart_items')
     .delete()
     .eq('user_id', userId);
-  if (error) console.warn('[CartContext] Failed to clear cart:', error.message);
+  if (error) {
+    console.error(`[CartContext] Failed to clear cart for user ${userId}:`, error);
+    throw error;
+  }
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -139,136 +211,131 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const { user, loading: authLoading } = useAuth();
   const [items, dispatch] = useReducer(cartReducer, []);
   const [isOpen, setIsOpen] = useState(false);
-  const [syncing, setSyncing] = useState(true);
-  const [syncedUserId, setSyncedUserId] = useState<string | null>(null);
+  const [hydratedKey, setHydratedKey] = useState<string | null>(null);
 
-  const userId = user?.id ?? null;
+  const syncKey = user?.id ?? GUEST_SYNC_KEY;
+  const loading = authLoading || hydratedKey !== syncKey;
 
-  // Core sync effect: triggers on auth state changes
   useEffect(() => {
-    // Wait for auth to finish loading before doing anything
     if (authLoading) return;
 
-    // Already synced for this user (or both null)
-    if (userId === syncedUserId) return;
+    let cancelled = false;
 
-    if (userId) {
-      // User logged in — fetch from Supabase
-      let cancelled = false;
-      setSyncing(true);
-
-      (async () => {
+    const syncCart = async () => {
+      if (user) {
         try {
-          const supabaseItems = await fetchSupabaseCart(userId);
+          const remoteItems = await fetchSupabaseCart(user.id);
 
           if (cancelled) return;
 
-          // Migrate any guest localStorage items to Supabase
-          const localItems = loadFromStorage();
-          if (localItems.length > 0) {
-            const supabaseKeys = new Set(
-              supabaseItems.map((i) => itemKey(i.id, i.size, i.color))
-            );
-            for (const localItem of localItems) {
-              const key = itemKey(localItem.id, localItem.size, localItem.color);
-              if (!supabaseKeys.has(key)) {
-                await upsertSupabaseCartItem(userId, localItem);
-                supabaseItems.push(localItem);
-              }
-            }
+          const guestItems = loadFromStorage();
+          let nextItems = remoteItems;
+
+          if (guestItems.length > 0) {
+            nextItems = mergeCartItems(remoteItems, guestItems);
+            await upsertSupabaseCartItems(user.id, nextItems);
+
+            if (cancelled) return;
+
+            clearStorage();
           }
 
+          dispatch({ type: 'SET_ITEMS', payload: nextItems });
+        } catch (error) {
+          console.error(`[CartContext] Failed to hydrate cart for user ${user.id}:`, error);
+          dispatch({ type: 'SET_ITEMS', payload: [] });
+        } finally {
           if (!cancelled) {
-            dispatch({ type: 'SET_ITEMS', payload: supabaseItems });
-            localStorage.removeItem(STORAGE_KEY);
-            setSyncedUserId(userId);
-            setSyncing(false);
-          }
-        } catch {
-          // Supabase fetch failed — fall back to localStorage
-          if (!cancelled) {
-            dispatch({ type: 'SET_ITEMS', payload: loadFromStorage() });
-            setSyncedUserId(userId);
-            setSyncing(false);
+            setHydratedKey(user.id);
           }
         }
-      })();
+        return;
+      }
 
-      return () => { cancelled = true; };
-    } else {
-      // Logged out — clear state, preserve nothing in localStorage
-      dispatch({ type: 'CLEAR_CART' });
-      localStorage.removeItem(STORAGE_KEY);
-      setSyncedUserId(null);
-      setSyncing(false);
-    }
-  }, [userId, authLoading, syncedUserId]);
-
-  // Load guest cart from localStorage on first mount (no user)
-  useEffect(() => {
-    if (!authLoading && !userId) {
       dispatch({ type: 'SET_ITEMS', payload: loadFromStorage() });
-      setSyncing(false);
-    }
-  }, [authLoading, userId]);
+      setHydratedKey(GUEST_SYNC_KEY);
+    };
 
-  // Persist to localStorage for guests only
+    void syncCart();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, authLoading]);
+
   useEffect(() => {
-    if (!userId && !syncing) {
+    if (!authLoading && !user && hydratedKey === GUEST_SYNC_KEY) {
       saveToStorage(items);
     }
-  }, [items, userId, syncing]);
+  }, [items, user, authLoading, hydratedKey]);
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const addItem = useCallback((item: CartItem) => {
     dispatch({ type: 'ADD_ITEM', payload: item });
-    if (userId) {
-      // Read current items to compute merged quantity for Supabase
+
+    if (user) {
       const existing = items.find(
         (i) => i.id === item.id && i.size === item.size && i.color === item.color
       );
-      const merged = existing
+      const nextItem = existing
         ? { ...existing, quantity: existing.quantity + item.quantity }
         : item;
-      upsertSupabaseCartItem(userId, merged);
+
+      void upsertSupabaseCartItem(user.id, nextItem).catch((error) => {
+        console.error(`[CartContext] Failed to sync added cart item for user ${user.id}:`, error);
+      });
     }
-  }, [userId, items]);
+  }, [user, items]);
 
   const removeItem = useCallback((id: string, size: string, color: string) => {
     dispatch({ type: 'REMOVE_ITEM', payload: { id, size, color } });
-    if (userId) {
-      deleteSupabaseCartItem(userId, id, size, color);
+
+    if (user) {
+      void deleteSupabaseCartItem(user.id, id, size, color).catch((error) => {
+        console.error(`[CartContext] Failed to sync removed cart item for user ${user.id}:`, error);
+      });
     }
-  }, [userId]);
+  }, [user]);
 
   const updateQuantity = useCallback((id: string, size: string, color: string, quantity: number) => {
     if (quantity < 1) return;
+
     dispatch({ type: 'UPDATE_QUANTITY', payload: { id, size, color, quantity } });
-    if (userId) {
+
+    if (user) {
       const item = items.find(
         (i) => i.id === id && i.size === size && i.color === color
       );
+
       if (item) {
-        upsertSupabaseCartItem(userId, { ...item, quantity });
+        void upsertSupabaseCartItem(user.id, { ...item, quantity }).catch((error) => {
+          console.error(`[CartContext] Failed to sync updated cart quantity for user ${user.id}:`, error);
+        });
       }
     }
-  }, [userId, items]);
+  }, [user, items]);
 
   const clearCart = useCallback(() => {
     dispatch({ type: 'CLEAR_CART' });
-    if (userId) {
-      clearSupabaseCart(userId);
+
+    if (user) {
+      void clearSupabaseCart(user.id).catch((error) => {
+        console.error(`[CartContext] Failed to sync cleared cart for user ${user.id}:`, error);
+      });
+      return;
     }
-  }, [userId]);
+
+    clearStorage();
+  }, [user]);
 
   const openCart = useCallback(() => setIsOpen(true), []);
   const closeCart = useCallback(() => setIsOpen(false), []);
 
   return (
     <CartContext.Provider
-      value={{ items, totalItems, totalPrice, addItem, removeItem, updateQuantity, clearCart, isOpen, openCart, closeCart }}
+      value={{ items, totalItems, totalPrice, loading, addItem, removeItem, updateQuantity, clearCart, isOpen, openCart, closeCart }}
     >
       {children}
     </CartContext.Provider>

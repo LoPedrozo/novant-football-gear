@@ -61,6 +61,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
+    try {
+      localStorage.removeItem('novant_cart');
+      localStorage.removeItem('novant_wishlist');
+    } catch (error) {
+      console.error('[AuthContext] Failed to clear local cart and wishlist on logout:', error);
+    }
+
     await supabase.auth.signOut();
     toast.success('Logout realizado.');
   };
