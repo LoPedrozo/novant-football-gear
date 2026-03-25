@@ -2,6 +2,7 @@ import { createContext, useContext, useReducer, useEffect, useState, useCallback
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { resolveProductImage } from '@/lib/productImages';
+import { signalCartMigrationDone, clearMigrationSession } from '@/lib/migrationCoordinator';
 
 export type CartItem = {
   id: string;
@@ -453,6 +454,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             guestItemsRef.current = [];
           }
 
+          console.log('[CartContext] Cart sync complete, signaling wishlist.', { userId });
+          signalCartMigrationDone(userId);
+
           if (!cancelled) {
             dispatch({ type: 'SET_ITEMS', payload: nextItems });
           }
@@ -461,6 +465,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             userId,
             error,
           });
+
+          // Signal done even on error so wishlist is never blocked
+          signalCartMigrationDone(userId);
 
           if (!cancelled) {
             dispatch({ type: 'SET_ITEMS', payload: [] });
@@ -488,6 +495,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     return () => {
       cancelled = true;
+      // Clear coordinator entry for this userId when the effect re-fires (userId/session changed).
+      // The closure captures the userId from this effect run, so on re-login the old entry is cleared.
+      if (userId) {
+        clearMigrationSession(userId);
+      }
     };
   }, [userId, authLoading]);
 

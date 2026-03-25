@@ -2,6 +2,7 @@ import { createContext, useContext, useReducer, useEffect, useState, useCallback
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { resolveProductImage } from '@/lib/productImages';
+import { waitForCartMigration } from '@/lib/migrationCoordinator';
 
 export type WishlistItem = {
   id: string;
@@ -291,6 +292,10 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
 
       if (userId) {
         try {
+          // Wait for cart migration to complete first — prevents simultaneous Supabase writes
+          await waitForCartMigration(userId);
+          console.log('[WishlistContext] Cart sync confirmed, starting wishlist sync.', { userId });
+
           let nextItems = await fetchSupabaseWishlist(userId);
           const guestItems = mergeGuestWishlistSources(guestItemsRef.current, loadFromStorage());
 
