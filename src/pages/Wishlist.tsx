@@ -1,28 +1,17 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Heart, X, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useWishlist } from '@/contexts/WishlistContext';
-import { useCart } from '@/contexts/CartContext';
+import { useWishlist, type WishlistItem } from '@/contexts/WishlistContext';
 import { resolveProductImage } from '@/lib/productImages';
 import { toast } from 'sonner';
 
 const Wishlist = () => {
   const { items, totalItems, removeItem, loading } = useWishlist();
-  const { addItem: addToCart, openCart } = useCart();
+  const navigate = useNavigate();
 
-  const handleAddToCart = (item: typeof items[0]) => {
-    addToCart({
-      id: item.id,
-      name: item.name,
-      brand: item.brand,
-      image_url: item.image_url,
-      price: item.price,
-      size: '',
-      color: '',
-      quantity: 1,
-    });
-    toast.success('Produto adicionado ao carrinho!');
-    openCart();
+  const handleSelectProduct = (item: WishlistItem) => {
+    toast.info('Selecione o tamanho do produto antes de adicionar ao carrinho.');
+    navigate(`/produto/${item.id}`);
   };
 
   if (loading) {
@@ -121,10 +110,10 @@ const Wishlist = () => {
 
                     {/* Add to cart button */}
                     <button
-                      onClick={() => handleAddToCart(item)}
+                      onClick={() => handleSelectProduct(item)}
                       className="w-full mt-3 bg-[#1A2F23] text-[#E8E3DA] rounded-none text-[9px] uppercase tracking-[3px] font-medium py-3 hover:bg-[#1A2F23]/90 transition-colors duration-300"
                     >
-                      Adicionar ao Carrinho
+                      Selecionar Tamanho
                     </button>
                   </div>
                 </div>

@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useEffect, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useReducer, useEffect, useState, useCallback, useRef, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { resolveProductImage } from '@/lib/productImages';
@@ -92,6 +92,33 @@ function mergeWishlistItems(remoteItems: WishlistItem[], guestItems: WishlistIte
   return Array.from(merged.values());
 }
 
+function mergeGuestWishlistSources(memoryItems: WishlistItem[], storedItems: WishlistItem[]) {
+  const merged = new Map<string, WishlistItem>();
+
+  storedItems.forEach((item) => {
+    merged.set(item.id, item);
+  });
+
+  memoryItems.forEach((item) => {
+    merged.set(item.id, item);
+  });
+
+  return Array.from(merged.values());
+}
+
+function normalizeWishlistRows(rows: WishlistRow[]) {
+  const uniqueProductIds = new Set<string>();
+
+  return rows.filter((row) => {
+    if (uniqueProductIds.has(row.product_id)) {
+      return false;
+    }
+
+    uniqueProductIds.add(row.product_id);
+    return true;
+  });
+}
+
 function wishlistReducer(state: WishlistItem[], action: WishlistAction): WishlistItem[] {
   switch (action.type) {
     case 'ADD_ITEM': {
@@ -155,9 +182,15 @@ async function fetchWishlistRows(userId: string): Promise<WishlistRow[]> {
     throw error;
   }
 
-  console.log('[WishlistContext] Wishlist rows fetched from Supabase.', { userId, count: data?.length ?? 0 });
+  const rows = normalizeWishlistRows((data ?? []) as WishlistRow[]);
 
-  return (data ?? []) as WishlistRow[];
+  console.log('[WishlistContext] Wishlist rows fetched from Supabase.', {
+    userId,
+    count: rows.length,
+    rawCount: data?.length ?? 0,
+  });
+
+  return rows;
 }
 
 async function fetchSupabaseWishlist(userId: string): Promise<WishlistItem[]> {
@@ -188,61 +221,18 @@ async function fetchSupabaseWishlist(userId: string): Promise<WishlistItem[]> {
   return items;
 }
 
-async function insertSupabaseWishlistItem(userId: string, item: WishlistItem) {
-  console.log('[WishlistContext] addItem -> checking existing wishlist row in Supabase.', {
-    userId,
-    productId: item.id,
-  });
-
-  const { data: existingRow, error: existingError } = await (supabase as any)
+async function upsertSupabaseWishlistItem(userId: string, productId: string) {
+  const { error } = await (supabase as any)
     .from('wishlists')
-    .select('product_id')
-    .eq('user_id', userId)
-    .eq('product_id', item.id)
-    .maybeSingle();
+    .upsert(
+      { user_id: userId, product_id: productId },
+      { onConflict: 'user_id,product_id' }
+    );
 
-  if (existingError) {
-    console.error('[WishlistContext] Failed to check existing wishlist row:', {
-      userId,
-      productId: item.id,
-      error: existingError,
-    });
-    throw existingError;
+  if (error) {
+    console.error('[WishlistContext] Failed to upsert wishlist item:', { userId, productId, error });
+    throw error;
   }
-
-  if (existingRow) {
-    console.log('[WishlistContext] addItem -> wishlist row already exists, skipping insert.', {
-      userId,
-      productId: item.id,
-    });
-    return;
-  }
-
-  console.log('[WishlistContext] addItem -> inserting wishlist row into Supabase.', {
-    userId,
-    productId: item.id,
-  });
-
-  const { error: insertError } = await (supabase as any)
-    .from('wishlists')
-    .insert({
-      user_id: userId,
-      product_id: item.id,
-    });
-
-  if (insertError) {
-    console.error('[WishlistContext] Failed to insert wishlist row into Supabase:', {
-      userId,
-      productId: item.id,
-      error: insertError,
-    });
-    throw insertError;
-  }
-
-  console.log('[WishlistContext] addItem -> wishlist row inserted successfully.', {
-    userId,
-    productId: item.id,
-  });
 }
 
 async function deleteSupabaseWishlistItem(userId: string, productId: string) {
@@ -278,9 +268,18 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
   const { user, loading: authLoading } = useAuth();
   const [items, dispatch] = useReducer(wishlistReducer, []);
   const [hydratedKey, setHydratedKey] = useState<string | null>(null);
+  const userId = user?.id ?? null;
+  const guestItemsRef = useRef<WishlistItem[]>([]);
+  const guestMigrationPromiseRef = useRef<Promise<void> | null>(null);
 
-  const syncKey = user?.id ?? GUEST_SYNC_KEY;
+  const syncKey = userId ?? GUEST_SYNC_KEY;
   const loading = authLoading || hydratedKey !== syncKey;
+
+  useEffect(() => {
+    if (!userId && hydratedKey === GUEST_SYNC_KEY) {
+      guestItemsRef.current = items;
+    }
+  }, [items, userId, hydratedKey]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -288,25 +287,39 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
     let cancelled = false;
 
     const syncWishlist = async () => {
-      console.log('[WishlistContext] Starting wishlist sync.', { userId: user?.id ?? null });
+      console.log('[WishlistContext] Starting wishlist sync.', { userId });
 
-      if (user) {
+      if (userId) {
         try {
-          let nextItems = await fetchSupabaseWishlist(user.id);
-          const guestItems = loadFromStorage();
+          let nextItems = await fetchSupabaseWishlist(userId);
+          const guestItems = mergeGuestWishlistSources(guestItemsRef.current, loadFromStorage());
 
-          if (guestItems.length > 0) {
+          if (guestItems.length > 0 && !guestMigrationPromiseRef.current) {
+            const pendingGuestItems = guestItems;
+
             console.log('[WishlistContext] Migrating guest wishlist items to Supabase.', {
-              userId: user.id,
-              count: guestItems.length,
+              userId,
+              count: pendingGuestItems.length,
             });
 
-            for (const guestItem of guestItems) {
-              await insertSupabaseWishlistItem(user.id, guestItem);
-            }
+            guestMigrationPromiseRef.current = (async () => {
+              try {
+                for (const guestItem of pendingGuestItems) {
+                  await upsertSupabaseWishlistItem(userId, guestItem.id);
+                }
+                guestItemsRef.current = [];
+                clearStorage();
+              } finally {
+                guestMigrationPromiseRef.current = null;
+              }
+            })();
+          }
 
-            clearStorage();
-            nextItems = mergeWishlistItems(await fetchSupabaseWishlist(user.id), []);
+          if (guestMigrationPromiseRef.current) {
+            await guestMigrationPromiseRef.current;
+            nextItems = await fetchSupabaseWishlist(userId);
+          } else {
+            guestItemsRef.current = [];
           }
 
           if (!cancelled) {
@@ -314,7 +327,7 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
           }
         } catch (error) {
           console.error('[WishlistContext] Failed to hydrate wishlist for authenticated user:', {
-            userId: user.id,
+            userId,
             error,
           });
 
@@ -323,7 +336,7 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
           }
         } finally {
           if (!cancelled) {
-            setHydratedKey(user.id);
+            setHydratedKey(userId);
           }
         }
 
@@ -334,6 +347,7 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
       console.log('[WishlistContext] Hydrating guest wishlist from localStorage.', { count: guestItems.length });
 
       if (!cancelled) {
+        guestItemsRef.current = guestItems;
         dispatch({ type: 'SET_ITEMS', payload: guestItems });
         setHydratedKey(GUEST_SYNC_KEY);
       }
@@ -344,41 +358,37 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       cancelled = true;
     };
-  }, [user, authLoading]);
+  }, [userId, authLoading]);
 
   useEffect(() => {
-    if (!authLoading && !user && hydratedKey === GUEST_SYNC_KEY) {
+    if (!authLoading && !userId && hydratedKey === GUEST_SYNC_KEY) {
       saveToStorage(items);
     }
-  }, [items, user, authLoading, hydratedKey]);
+  }, [items, userId, authLoading, hydratedKey]);
 
   const addItem = useCallback((item: WishlistItem) => {
-    console.log('[WishlistContext] addItem called.', { userId: user?.id ?? null, item });
     dispatch({ type: 'ADD_ITEM', payload: item });
 
-    if (user) {
-      void insertSupabaseWishlistItem(user.id, item).catch((error) => {
-        console.error('[WishlistContext] addItem sync failed:', { userId: user.id, item, error });
+    if (userId) {
+      void upsertSupabaseWishlistItem(userId, item.id).catch((error) => {
+        console.error('[WishlistContext] addItem sync failed, reverting:', { userId, productId: item.id, error });
+        dispatch({ type: 'REMOVE_ITEM', payload: item.id });
       });
-      return;
     }
-
-    console.log('[WishlistContext] addItem executed for guest user. Persistence will remain in localStorage.');
-  }, [user]);
+  }, [userId]);
 
   const removeItem = useCallback((id: string) => {
-    console.log('[WishlistContext] removeItem called.', { userId: user?.id ?? null, productId: id });
     dispatch({ type: 'REMOVE_ITEM', payload: id });
 
-    if (user) {
-      void deleteSupabaseWishlistItem(user.id, id).catch((error) => {
-        console.error('[WishlistContext] removeItem sync failed:', { userId: user.id, productId: id, error });
+    if (userId) {
+      void deleteSupabaseWishlistItem(userId, id).catch((error) => {
+        console.error('[WishlistContext] removeItem sync failed, restoring state:', { userId, productId: id, error });
+        void fetchSupabaseWishlist(userId).then((freshItems) => {
+          dispatch({ type: 'SET_ITEMS', payload: freshItems });
+        });
       });
-      return;
     }
-
-    console.log('[WishlistContext] removeItem executed for guest user. Persistence will remain in localStorage.');
-  }, [user]);
+  }, [userId]);
 
   const toggleItem = useCallback((item: WishlistItem) => {
     if (items.some((i) => i.id === item.id)) {

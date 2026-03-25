@@ -54,20 +54,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${import.meta.env.VITE_APP_URL || window.location.origin}/auth/callback`,
       },
     });
     if (error) throw error;
   };
 
   const signOut = async () => {
-    try {
-      localStorage.removeItem('novant_cart');
-      localStorage.removeItem('novant_wishlist');
-    } catch (error) {
-      console.error('[AuthContext] Failed to clear local cart and wishlist on logout:', error);
-    }
-
     await supabase.auth.signOut();
     toast.success('Logout realizado.');
   };

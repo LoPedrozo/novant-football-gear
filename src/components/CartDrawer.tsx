@@ -1,11 +1,18 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { X, Trash2, ShoppingBag, Minus, Plus } from 'lucide-react';
+import { X, Trash2, ShoppingBag, Minus, Plus, LogIn } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
-const CartDrawer = () => {
+interface CartDrawerProps {
+  onRequestAuth?: () => void;
+}
+
+const CartDrawer = ({ onRequestAuth }: CartDrawerProps) => {
   const { items, totalItems, totalPrice, removeItem, updateQuantity, clearCart, isOpen, closeCart } = useCart();
+  const { user } = useAuth();
+  const [showLoginGate, setShowLoginGate] = useState(false);
 
   // Lock body scroll when drawer is open
   useEffect(() => {
@@ -13,17 +20,33 @@ const CartDrawer = () => {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
+      setShowLoginGate(false);
     }
     return () => {
       document.body.style.overflow = '';
     };
   }, [isOpen]);
 
+  // Reset login gate when user logs in
+  useEffect(() => {
+    if (user) setShowLoginGate(false);
+  }, [user]);
+
   const formatPrice = (value: number) =>
     `R$ ${value.toFixed(2).replace('.', ',')}`;
 
   const handleCheckout = () => {
+    if (!user) {
+      setShowLoginGate(true);
+      return;
+    }
     toast('Em breve! Funcionalidade em desenvolvimento.');
+  };
+
+  const handleRequestAuth = () => {
+    if (onRequestAuth) {
+      onRequestAuth();
+    }
   };
 
   return (
@@ -57,7 +80,26 @@ const CartDrawer = () => {
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto">
-          {items.length === 0 ? (
+          {showLoginGate ? (
+            <div className="flex flex-col items-center justify-center h-full gap-6 px-8 text-center">
+              <LogIn className="h-12 w-12 text-[#eae7e0]" strokeWidth={1} />
+              <p className="text-sm text-[#1A2F23] font-medium leading-relaxed">
+                Para finalizar sua compra, você precisa estar logado.
+              </p>
+              <button
+                onClick={handleRequestAuth}
+                className="w-full bg-[#1A2F23] text-[#E8E3DA] rounded-none text-[10px] uppercase tracking-[4px] font-medium py-4 hover:bg-[#1A2F23]/90 transition-colors duration-300"
+              >
+                Entrar / Cadastrar
+              </button>
+              <button
+                onClick={() => setShowLoginGate(false)}
+                className="w-full border border-[#eae7e0] text-[#1A2F23] rounded-none text-[10px] uppercase tracking-[4px] font-medium py-4 hover:border-[#7BAF8E] transition-colors duration-300"
+              >
+                Continuar Comprando
+              </button>
+            </div>
+          ) : items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full gap-4 px-6">
               <ShoppingBag className="h-12 w-12 text-[#eae7e0]" strokeWidth={1} />
               <p className="text-sm text-[#aaaaaa] font-normal">Seu carrinho está vazio</p>
@@ -134,7 +176,7 @@ const CartDrawer = () => {
         </div>
 
         {/* Footer */}
-        {items.length > 0 && (
+        {items.length > 0 && !showLoginGate && (
           <div className="border-t border-[#eae7e0] px-6 py-5 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-[10px] uppercase tracking-[2.5px] font-medium text-[#aaaaaa]">Subtotal</span>

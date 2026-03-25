@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useEffect, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useReducer, useEffect, useState, useCallback, useRef, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { resolveProductImage } from '@/lib/productImages';
@@ -19,6 +19,10 @@ type CartRow = {
   size: string | null;
   color: string | null;
   quantity: number;
+};
+
+type CartQuantityRow = {
+  quantity: number | null;
 };
 
 type ProductPreview = {
@@ -106,6 +110,46 @@ function mergeCartItems(remoteItems: CartItem[], guestItems: CartItem[]) {
     }
 
     merged.set(key, item);
+  });
+
+  return Array.from(merged.values());
+}
+
+function mergeGuestCartSources(memoryItems: CartItem[], storedItems: CartItem[]) {
+  const merged = new Map<string, CartItem>();
+
+  storedItems.forEach((item) => {
+    merged.set(itemKey(item.id, item.size, item.color), item);
+  });
+
+  memoryItems.forEach((item) => {
+    merged.set(itemKey(item.id, item.size, item.color), item);
+  });
+
+  return Array.from(merged.values());
+}
+
+function normalizeCartRows(rows: CartRow[]) {
+  const merged = new Map<string, CartRow>();
+
+  rows.forEach((row) => {
+    const normalizedRow = {
+      ...row,
+      size: row.size ?? '',
+      color: row.color ?? '',
+    };
+    const key = itemKey(normalizedRow.product_id, normalizedRow.size, normalizedRow.color);
+    const existing = merged.get(key);
+
+    if (existing) {
+      merged.set(key, {
+        ...existing,
+        quantity: existing.quantity + normalizedRow.quantity,
+      });
+      return;
+    }
+
+    merged.set(key, normalizedRow);
   });
 
   return Array.from(merged.values());
@@ -202,9 +246,47 @@ async function fetchCartRows(userId: string): Promise<CartRow[]> {
     throw error;
   }
 
-  console.log('[CartContext] Cart rows fetched from Supabase.', { userId, count: data?.length ?? 0 });
+  const rows = normalizeCartRows((data ?? []) as CartRow[]);
 
-  return (data ?? []) as CartRow[];
+  console.log('[CartContext] Cart rows fetched from Supabase.', {
+    userId,
+    count: rows.length,
+    rawCount: data?.length ?? 0,
+  });
+
+  return rows;
+}
+
+async function upsertSupabaseCartRow(userId: string, productId: string, size: string, color: string, quantity: number) {
+  const normalizedQuantity = Math.max(0, quantity);
+
+  if (normalizedQuantity === 0) {
+    const { error } = await (supabase as any)
+      .from('cart_items')
+      .delete()
+      .eq('user_id', userId)
+      .eq('product_id', productId)
+      .eq('size', size)
+      .eq('color', color);
+
+    if (error) {
+      console.error('[CartContext] Failed to delete cart row:', { userId, productId, size, color, error });
+      throw error;
+    }
+    return;
+  }
+
+  const { error } = await (supabase as any)
+    .from('cart_items')
+    .upsert(
+      { user_id: userId, product_id: productId, size, color, quantity: normalizedQuantity },
+      { onConflict: 'user_id,product_id,size,color' }
+    );
+
+  if (error) {
+    console.error('[CartContext] Failed to upsert cart row:', { userId, productId, size, color, quantity: normalizedQuantity, error });
+    throw error;
+  }
 }
 
 async function fetchSupabaseCart(userId: string): Promise<CartItem[]> {
@@ -236,148 +318,27 @@ async function fetchSupabaseCart(userId: string): Promise<CartItem[]> {
 }
 
 async function insertSupabaseCartItem(userId: string, item: CartItem) {
-  console.log('[CartContext] addItem -> checking existing cart row in Supabase.', {
-    userId,
-    productId: item.id,
-    size: item.size,
-    color: item.color,
-    quantity: item.quantity,
-  });
-
-  const { data: existingRow, error: existingError } = await (supabase as any)
+  const { data: existingRows, error: selectError } = await (supabase as any)
     .from('cart_items')
     .select('quantity')
     .eq('user_id', userId)
     .eq('product_id', item.id)
     .eq('size', item.size)
-    .eq('color', item.color)
-    .maybeSingle();
+    .eq('color', item.color);
 
-  if (existingError) {
-    console.error('[CartContext] Failed to check existing cart row:', {
-      userId,
-      productId: item.id,
-      size: item.size,
-      color: item.color,
-      error: existingError,
-    });
-    throw existingError;
+  if (selectError) {
+    console.error('[CartContext] Failed to check existing cart row:', { userId, productId: item.id, error: selectError });
+    throw selectError;
   }
 
-  if (existingRow) {
-    const nextQuantity = Number(existingRow.quantity ?? 0) + item.quantity;
+  const existingQuantity = (existingRows as CartQuantityRow[] ?? [])
+    .reduce((sum, row) => sum + Number(row.quantity ?? 0), 0);
 
-    console.log('[CartContext] addItem -> updating existing cart row in Supabase.', {
-      userId,
-      productId: item.id,
-      size: item.size,
-      color: item.color,
-      quantity: nextQuantity,
-    });
-
-    const { error: updateError } = await (supabase as any)
-      .from('cart_items')
-      .update({ quantity: nextQuantity })
-      .eq('user_id', userId)
-      .eq('product_id', item.id)
-      .eq('size', item.size)
-      .eq('color', item.color);
-
-    if (updateError) {
-      console.error('[CartContext] Failed to update existing cart row during addItem:', {
-        userId,
-        productId: item.id,
-        size: item.size,
-        color: item.color,
-        error: updateError,
-      });
-      throw updateError;
-    }
-
-    console.log('[CartContext] addItem -> existing cart row updated successfully.', {
-      userId,
-      productId: item.id,
-      size: item.size,
-      color: item.color,
-      quantity: nextQuantity,
-    });
-
-    return;
-  }
-
-  console.log('[CartContext] addItem -> inserting cart row into Supabase.', {
-    userId,
-    productId: item.id,
-    size: item.size,
-    color: item.color,
-    quantity: item.quantity,
-  });
-
-  const { error: insertError } = await (supabase as any)
-    .from('cart_items')
-    .insert({
-      user_id: userId,
-      product_id: item.id,
-      size: item.size,
-      color: item.color,
-      quantity: item.quantity,
-    });
-
-  if (insertError) {
-    console.error('[CartContext] Failed to insert cart row into Supabase:', {
-      userId,
-      productId: item.id,
-      size: item.size,
-      color: item.color,
-      error: insertError,
-    });
-    throw insertError;
-  }
-
-  console.log('[CartContext] addItem -> cart row inserted successfully.', {
-    userId,
-    productId: item.id,
-    size: item.size,
-    color: item.color,
-    quantity: item.quantity,
-  });
+  await upsertSupabaseCartRow(userId, item.id, item.size, item.color, existingQuantity + item.quantity);
 }
 
 async function updateSupabaseCartQuantity(userId: string, id: string, size: string, color: string, quantity: number) {
-  console.log('[CartContext] updateQuantity -> updating cart row in Supabase.', {
-    userId,
-    productId: id,
-    size,
-    color,
-    quantity,
-  });
-
-  const { error } = await (supabase as any)
-    .from('cart_items')
-    .update({ quantity })
-    .eq('user_id', userId)
-    .eq('product_id', id)
-    .eq('size', size)
-    .eq('color', color);
-
-  if (error) {
-    console.error('[CartContext] Failed to update cart quantity in Supabase:', {
-      userId,
-      productId: id,
-      size,
-      color,
-      error,
-    });
-    throw error;
-  }
-
-  console.log('[CartContext] updateQuantity -> cart row updated successfully.', {
-    userId,
-    productId: id,
-    size,
-    color,
-    quantity,
-  });
+  await upsertSupabaseCartRow(userId, id, size, color, quantity);
 }
 
 async function deleteSupabaseCartItem(userId: string, id: string, size: string, color: string) {
@@ -438,9 +399,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, dispatch] = useReducer(cartReducer, []);
   const [isOpen, setIsOpen] = useState(false);
   const [hydratedKey, setHydratedKey] = useState<string | null>(null);
+  const userId = user?.id ?? null;
+  const guestItemsRef = useRef<CartItem[]>([]);
+  const guestMigrationPromiseRef = useRef<Promise<void> | null>(null);
 
-  const syncKey = user?.id ?? GUEST_SYNC_KEY;
+  const syncKey = userId ?? GUEST_SYNC_KEY;
   const loading = authLoading || hydratedKey !== syncKey;
+
+  useEffect(() => {
+    if (!userId && hydratedKey === GUEST_SYNC_KEY) {
+      guestItemsRef.current = items;
+    }
+  }, [items, userId, hydratedKey]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -448,25 +418,39 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     let cancelled = false;
 
     const syncCart = async () => {
-      console.log('[CartContext] Starting cart sync.', { userId: user?.id ?? null });
+      console.log('[CartContext] Starting cart sync.', { userId });
 
-      if (user) {
+      if (userId) {
         try {
-          let nextItems = await fetchSupabaseCart(user.id);
-          const guestItems = loadFromStorage();
+          let nextItems = await fetchSupabaseCart(userId);
+          const guestItems = mergeGuestCartSources(guestItemsRef.current, loadFromStorage());
 
-          if (guestItems.length > 0) {
+          if (guestItems.length > 0 && !guestMigrationPromiseRef.current) {
+            const pendingGuestItems = guestItems;
+
             console.log('[CartContext] Migrating guest cart items to Supabase.', {
-              userId: user.id,
-              count: guestItems.length,
+              userId,
+              count: pendingGuestItems.length,
             });
 
-            for (const guestItem of guestItems) {
-              await insertSupabaseCartItem(user.id, guestItem);
-            }
+            guestMigrationPromiseRef.current = (async () => {
+              try {
+                for (const guestItem of pendingGuestItems) {
+                  await insertSupabaseCartItem(userId, guestItem);
+                }
+                guestItemsRef.current = [];
+                clearStorage();
+              } finally {
+                guestMigrationPromiseRef.current = null;
+              }
+            })();
+          }
 
-            clearStorage();
-            nextItems = mergeCartItems(await fetchSupabaseCart(user.id), []);
+          if (guestMigrationPromiseRef.current) {
+            await guestMigrationPromiseRef.current;
+            nextItems = await fetchSupabaseCart(userId);
+          } else {
+            guestItemsRef.current = [];
           }
 
           if (!cancelled) {
@@ -474,7 +458,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           }
         } catch (error) {
           console.error('[CartContext] Failed to hydrate cart for authenticated user:', {
-            userId: user.id,
+            userId,
             error,
           });
 
@@ -483,7 +467,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           }
         } finally {
           if (!cancelled) {
-            setHydratedKey(user.id);
+            setHydratedKey(userId);
           }
         }
 
@@ -494,6 +478,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       console.log('[CartContext] Hydrating guest cart from localStorage.', { count: guestItems.length });
 
       if (!cancelled) {
+        guestItemsRef.current = guestItems;
         dispatch({ type: 'SET_ITEMS', payload: guestItems });
         setHydratedKey(GUEST_SYNC_KEY);
       }
@@ -504,39 +489,39 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       cancelled = true;
     };
-  }, [user, authLoading]);
+  }, [userId, authLoading]);
 
   useEffect(() => {
-    if (!authLoading && !user && hydratedKey === GUEST_SYNC_KEY) {
+    if (!authLoading && !userId && hydratedKey === GUEST_SYNC_KEY) {
       saveToStorage(items);
     }
-  }, [items, user, authLoading, hydratedKey]);
+  }, [items, userId, authLoading, hydratedKey]);
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const addItem = useCallback((item: CartItem) => {
-    console.log('[CartContext] addItem called.', { userId: user?.id ?? null, item });
+    console.log('[CartContext] addItem called.', { userId, item });
     dispatch({ type: 'ADD_ITEM', payload: item });
 
-    if (user) {
-      void insertSupabaseCartItem(user.id, item).catch((error) => {
-        console.error('[CartContext] addItem sync failed:', { userId: user.id, item, error });
+    if (userId) {
+      void insertSupabaseCartItem(userId, item).catch((error) => {
+        console.error('[CartContext] addItem sync failed:', { userId, item, error });
       });
       return;
     }
 
     console.log('[CartContext] addItem executed for guest user. Persistence will remain in localStorage.');
-  }, [user]);
+  }, [userId]);
 
   const removeItem = useCallback((id: string, size: string, color: string) => {
-    console.log('[CartContext] removeItem called.', { userId: user?.id ?? null, productId: id, size, color });
+    console.log('[CartContext] removeItem called.', { userId, productId: id, size, color });
     dispatch({ type: 'REMOVE_ITEM', payload: { id, size, color } });
 
-    if (user) {
-      void deleteSupabaseCartItem(user.id, id, size, color).catch((error) => {
+    if (userId) {
+      void deleteSupabaseCartItem(userId, id, size, color).catch((error) => {
         console.error('[CartContext] removeItem sync failed:', {
-          userId: user.id,
+          userId,
           productId: id,
           size,
           color,
@@ -547,13 +532,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
 
     console.log('[CartContext] removeItem executed for guest user. Persistence will remain in localStorage.');
-  }, [user]);
+  }, [userId]);
 
   const updateQuantity = useCallback((id: string, size: string, color: string, quantity: number) => {
     if (quantity < 1) return;
 
     console.log('[CartContext] updateQuantity called.', {
-      userId: user?.id ?? null,
+      userId,
       productId: id,
       size,
       color,
@@ -562,10 +547,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     dispatch({ type: 'UPDATE_QUANTITY', payload: { id, size, color, quantity } });
 
-    if (user) {
-      void updateSupabaseCartQuantity(user.id, id, size, color, quantity).catch((error) => {
+    if (userId) {
+      void updateSupabaseCartQuantity(userId, id, size, color, quantity).catch((error) => {
         console.error('[CartContext] updateQuantity sync failed:', {
-          userId: user.id,
+          userId,
           productId: id,
           size,
           color,
@@ -577,21 +562,21 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
 
     console.log('[CartContext] updateQuantity executed for guest user. Persistence will remain in localStorage.');
-  }, [user]);
+  }, [userId]);
 
   const clearCart = useCallback(() => {
-    console.log('[CartContext] clearCart called.', { userId: user?.id ?? null });
+    console.log('[CartContext] clearCart called.', { userId });
     dispatch({ type: 'CLEAR_CART' });
 
-    if (user) {
-      void clearSupabaseCart(user.id).catch((error) => {
-        console.error('[CartContext] clearCart sync failed:', { userId: user.id, error });
+    if (userId) {
+      void clearSupabaseCart(userId).catch((error) => {
+        console.error('[CartContext] clearCart sync failed:', { userId, error });
       });
       return;
     }
 
     clearStorage();
-  }, [user]);
+  }, [userId]);
 
   const openCart = useCallback(() => setIsOpen(true), []);
   const closeCart = useCallback(() => setIsOpen(false), []);

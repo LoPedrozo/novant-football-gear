@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Heart, ShoppingBag, User, Menu, X, LogOut, Package, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -16,15 +16,31 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const { user, signOut } = useAuth();
-  const { totalItems, openCart } = useCart();
+  const { totalItems, openCart, closeCart } = useCart();
   const { totalItems: wishlistCount } = useWishlist();
   const navigate = useNavigate();
+  const pendingCartReopenRef = useRef(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // Reopen cart after successful login triggered from login gate
+  useEffect(() => {
+    if (user && pendingCartReopenRef.current) {
+      pendingCartReopenRef.current = false;
+      const timer = setTimeout(() => openCart(), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [user, openCart]);
+
+  const handleCartRequestAuth = () => {
+    closeCart();
+    pendingCartReopenRef.current = true;
+    setAuthModalOpen(true);
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -151,7 +167,7 @@ const Navbar = () => {
         </div>
       )}
 
-      <CartDrawer />
+      <CartDrawer onRequestAuth={handleCartRequestAuth} />
       <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </nav>
   );
