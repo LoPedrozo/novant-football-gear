@@ -268,14 +268,43 @@ const ProductDetail = () => {
         </motion.div>
 
         {/* Description */}
-        {product.description && (
-          <div className="mt-16 max-w-3xl">
-            <h2 className="text-[10px] font-extrabold text-[#aaaaaa] uppercase tracking-[5px] mb-6">Descrição</h2>
-            <p className="text-sm text-[#aaaaaa] leading-[2] font-normal">
-              {product.description}
-            </p>
-          </div>
-        )}
+        {product.description && (() => {
+          const lines = product.description.split('\n').filter((l: string) => l.trim() !== '');
+          const tagline = lines[0] ?? '';
+          const bodyLines = lines.slice(1).filter((l: string) => !l.startsWith('•'));
+          const bullets = lines.filter((l: string) => l.startsWith('•'));
+          return (
+            <div className="mt-16 max-w-3xl">
+              <h2 className="text-[10px] font-extrabold text-[#aaaaaa] uppercase tracking-[5px] mb-6">Descrição</h2>
+              {tagline && (
+                <p className="text-base font-bold text-[#1A2F23] leading-snug mb-4">
+                  {tagline}
+                </p>
+              )}
+              {bodyLines.length > 0 && (
+                <div className="mb-4 space-y-2">
+                  {bodyLines.map((line: string, i: number) => (
+                    <p key={i} className="text-sm text-[#aaaaaa] leading-[1.8] font-normal">
+                      {line}
+                    </p>
+                  ))}
+                </div>
+              )}
+              {bullets.length > 0 && (
+                <ul className="space-y-2">
+                  {bullets.map((item: string, i: number) => (
+                    <li key={i} className="flex items-start gap-2.5">
+                      <span className="mt-[3px] w-1.5 h-1.5 rounded-full bg-[#1A2F23] flex-shrink-0" />
+                      <span className="text-xs text-[#aaaaaa] leading-[1.8]">
+                        {item.replace(/^•\s*/, '')}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Related products */}
         {related.length > 0 && (
