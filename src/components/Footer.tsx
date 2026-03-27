@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Instagram, Facebook, Twitter } from 'lucide-react';
 
+
 const Footer = () => {
   return (
     <footer className="bg-[#1A2F23]">
@@ -29,9 +30,9 @@ const Footer = () => {
           <div>
             <h4 className="text-[9px] font-medium tracking-[4px] uppercase text-[#7BAF8E] mb-5">Suporte</h4>
             <div className="flex flex-col gap-3">
-              <span className="text-xs text-[#E8E3DA]/25 font-light cursor-pointer hover:text-[#E8E3DA]/60 transition-colors duration-300">Trocas e Devoluções</span>
-              <span className="text-xs text-[#E8E3DA]/25 font-light cursor-pointer hover:text-[#E8E3DA]/60 transition-colors duration-300">Política de Privacidade</span>
-              <span className="text-xs text-[#E8E3DA]/25 font-light cursor-pointer hover:text-[#E8E3DA]/60 transition-colors duration-300">Termos de Uso</span>
+              <Link to="/trocas" className="text-xs text-[#E8E3DA]/25 font-light hover:text-[#E8E3DA]/60 transition-colors duration-300">Trocas e Devoluções</Link>
+              <Link to="/privacidade" className="text-xs text-[#E8E3DA]/25 font-light hover:text-[#E8E3DA]/60 transition-colors duration-300">Política de Privacidade</Link>
+              <Link to="/termos" className="text-xs text-[#E8E3DA]/25 font-light hover:text-[#E8E3DA]/60 transition-colors duration-300">Termos de Uso</Link>
             </div>
           </div>
 

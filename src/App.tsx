@@ -17,6 +17,9 @@ import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import AuthCallback from "./pages/AuthCallback";
 import Wishlist from "./pages/Wishlist";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Returns from "./pages/Returns";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +49,9 @@ const AppShell = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/favoritos" element={<Wishlist />} />
+        <Route path="/privacidade" element={<Privacy />} />
+        <Route path="/termos" element={<Terms />} />
+        <Route path="/trocas" element={<Returns />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
