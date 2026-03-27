@@ -39,9 +39,9 @@ const Footer = () => {
           <div>
             <h4 className="text-[9px] font-medium tracking-[4px] uppercase text-[#7BAF8E] mb-5">Social</h4>
             <div className="flex items-center gap-5">
-              <Instagram className="h-5 w-5 text-[#E8E3DA]/25 hover:text-[#7BAF8E] cursor-pointer transition-colors duration-300" strokeWidth={1.5} />
-              <Facebook className="h-5 w-5 text-[#E8E3DA]/25 hover:text-[#7BAF8E] cursor-pointer transition-colors duration-300" strokeWidth={1.5} />
-              <Twitter className="h-5 w-5 text-[#E8E3DA]/25 hover:text-[#7BAF8E] cursor-pointer transition-colors duration-300" strokeWidth={1.5} />
+              <a href="https://instagram.com/lo_pedrozo" target="_blank" rel="noopener noreferrer" className="text-[#E8E3DA]/25 hover:text-[#7BAF8E] transition-colors duration-300"><Instagram className="h-5 w-5" strokeWidth={1.5} /></a>
+              <a href="https://instagram.com/lo_pedrozo" target="_blank" rel="noopener noreferrer" className="text-[#E8E3DA]/25 hover:text-[#7BAF8E] transition-colors duration-300"><Facebook className="h-5 w-5" strokeWidth={1.5} /></a>
+              <a href="https://instagram.com/lo_pedrozo" target="_blank" rel="noopener noreferrer" className="text-[#E8E3DA]/25 hover:text-[#7BAF8E] transition-colors duration-300"><Twitter className="h-5 w-5" strokeWidth={1.5} /></a>
             </div>
           </div>
         </div>
