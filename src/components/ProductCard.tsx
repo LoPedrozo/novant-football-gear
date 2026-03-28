@@ -84,6 +84,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
               </span>
             )}
           </div>
+          {product.image_url_alt && (
+            <div className="flex items-center gap-1 pt-1">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#1A2F23] border border-[#eae7e0]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#7BAF8E] border border-[#eae7e0]" />
+            </div>
+          )}
         </div>
       </div>
     </Link>

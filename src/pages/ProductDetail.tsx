@@ -27,7 +27,7 @@ const ProductDetail = () => {
       setError(false);
       const { data, error: err } = await supabase
         .from('products')
-        .select('*')
+        .select('*, image_url_alt')
         .eq('id', id!)
         .single();
 
@@ -105,6 +105,16 @@ const ProductDetail = () => {
 
   const inWishlist = isInWishlist(product.id);
 
+  const handleColorSelect = (color: string) => {
+    setSelectedColor(color);
+    const isFirstColor = color === product.colors?.[0];
+    if (!isFirstColor && product.image_url_alt) {
+      setMainImage(resolveProductImage(product.image_url_alt));
+    } else {
+      setMainImage(resolveProductImage(product.image_url));
+    }
+  };
+
   const handleToggleFavorites = () => {
     toggleItem({
       id: product.id,
@@ -144,7 +154,7 @@ const ProductDetail = () => {
               <img
                 src={mainImage}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-opacity duration-300"
               />
             </div>
           </div>
@@ -222,17 +232,20 @@ const ProductDetail = () => {
               <div>
                 <p className="text-[10px] font-medium text-[#1A2F23] uppercase tracking-[2.5px] mb-3">Cor</p>
                 <div className="flex flex-wrap gap-2">
-                  {product.colors.map((color: string) => (
+                  {product.colors.map((color: string, idx: number) => (
                     <button
                       key={color}
-                      onClick={() => setSelectedColor(color)}
+                      onClick={() => handleColorSelect(color)}
                       className={`px-4 h-[44px] text-xs font-medium rounded-none border transition-all duration-200 ${
                         selectedColor === color
-                          ? 'border-[#1A2F23] text-[#1A2F23]'
+                          ? 'border-[#1A2F23] border-2 text-[#1A2F23] font-semibold'
                           : 'border-[#eae7e0] text-[#aaaaaa] hover:border-[#1A2F23] hover:text-[#1A2F23]'
-                      }`}
+                      }${idx > 0 && product.image_url_alt ? ' relative' : ''}`}
                     >
                       {color}
+                      {idx > 0 && product.image_url_alt && (
+                        <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#7BAF8E]" />
+                      )}
                     </button>
                   ))}
                 </div>

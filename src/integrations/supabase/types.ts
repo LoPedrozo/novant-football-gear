@@ -24,6 +24,7 @@ export type Database = {
           featured: boolean | null
           id: string
           image_url: string | null
+          image_url_alt: string | null
           in_stock: boolean | null
           name: string
           original_price: number | null
@@ -41,6 +42,7 @@ export type Database = {
           featured?: boolean | null
           id?: string
           image_url?: string | null
+          image_url_alt?: string | null
           in_stock?: boolean | null
           name: string
           original_price?: number | null
@@ -58,6 +60,7 @@ export type Database = {
           featured?: boolean | null
           id?: string
           image_url?: string | null
+          image_url_alt?: string | null
           in_stock?: boolean | null
           name?: string
           original_price?: number | null

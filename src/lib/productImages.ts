@@ -1,44 +1,43 @@
-// Eagerly import all product images so Vite bundles them.
-// Maps database image_url values (e.g. "/src/assets/products/copa-pure.jpg")
-// to hashed build-time URLs that work in production.
+// Product image resolution utility.
+//
+// Priority order:
+//   1. External URLs (http/https) — Supabase Storage, CDN, etc. → pass through directly
+//   2. Local asset paths (/src/assets/...) → resolved via Vite's import map (legacy fallback)
+//   3. Null / empty → /placeholder.svg
 
+// Eagerly bundle any remaining local assets so they still work in production builds.
 const imageModules = import.meta.glob<{ default: string }>(
   '@/assets/products/*.{jpg,jpeg,png,webp}',
   { eager: true },
 );
 
-const imageMap: Record<string, string> = {};
+const localImageMap: Record<string, string> = {};
 for (const [path, mod] of Object.entries(imageModules)) {
-  // path looks like "/src/assets/products/copa-pure.jpg"
-  // Also key by the bare filename for flexibility
   const normalized = path.replace(/^.*\/src\//, '/src/');
-  imageMap[normalized] = mod.default;
-
-  const filename = path.split('/').pop()!;
-  imageMap[filename] = mod.default;
+  localImageMap[normalized] = mod.default;
+  localImageMap[path.split('/').pop()!] = mod.default;
 }
 
 /**
- * Resolves a product image_url to a usable src.
- * - Local asset paths → bundled Vite URL
- * - External URLs (http/https) → passed through
- * - Null/empty → returns the fallback placeholder
+ * Resolves a product image URL to a usable <img src> value.
+ *
+ * @param imageUrl - The raw value from the database (image_url or image_url_alt)
+ * @returns A URL safe to use as an img src attribute
  */
 export function resolveProductImage(imageUrl: string | null | undefined): string {
   if (!imageUrl) return '/placeholder.svg';
 
-  // External URL — pass through
+  // 1. External URL (Supabase Storage / CDN) — use as-is, no auth needed
   if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
     return imageUrl;
   }
 
-  // Try matching against the import map
+  // 2. Local bundled asset — resolve via Vite import map
   const normalized = imageUrl.replace(/^.*\/src\//, '/src/');
-  if (imageMap[normalized]) return imageMap[normalized];
-
+  if (localImageMap[normalized]) return localImageMap[normalized];
   const filename = imageUrl.split('/').pop()!;
-  if (imageMap[filename]) return imageMap[filename];
+  if (localImageMap[filename]) return localImageMap[filename];
 
-  // Unknown path — return as-is (will 404 if truly broken)
+  // 3. Unknown — return as-is (Vite will serve it from /public if it exists)
   return imageUrl;
 }
