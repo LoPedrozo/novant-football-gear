@@ -84,10 +84,29 @@ const ProductCard = ({ product }: ProductCardProps) => {
               </span>
             )}
           </div>
-          {product.image_url_alt && (
+          {product.colors && product.colors.length > 0 && (
             <div className="flex items-center gap-1 pt-1">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#1A2F23] border border-[#eae7e0]" />
-              <span className="w-2.5 h-2.5 rounded-full bg-[#7BAF8E] border border-[#eae7e0]" />
+              {product.colors.map((color: string) => {
+                const colorMap: Record<string, string> = {
+                  "Preto": "#1A1A1A",
+                  "Branco": "#F5F5F5",
+                  "Rosa": "#FFB6C1",
+                  "Vermelho": "#DC2626",
+                  "Azul": "#2563EB",
+                  "Verde": "#16A34A",
+                  "Amarelo": "#FACC15",
+                  "Dourado": "#D4AF37",
+                  "Marrom": "#8B4513",
+                };
+                return (
+                  <span
+                    key={color}
+                    title={color}
+                    className="w-2.5 h-2.5 rounded-full border border-gray-200 flex-shrink-0"
+                    style={{ backgroundColor: colorMap[color] ?? '#aaaaaa' }}
+                  />
+                );
+              })}
             </div>
           )}
         </div>

@@ -232,7 +232,7 @@ const ProductDetail = () => {
               <div>
                 <p className="text-[10px] font-medium text-[#1A2F23] uppercase tracking-[2.5px] mb-3">Cor</p>
                 <div className="flex flex-wrap gap-2">
-                  {product.colors.map((color: string, idx: number) => (
+                  {product.colors.map((color: string) => (
                     <button
                       key={color}
                       onClick={() => handleColorSelect(color)}
@@ -240,12 +240,9 @@ const ProductDetail = () => {
                         selectedColor === color
                           ? 'border-[#1A2F23] border-2 text-[#1A2F23] font-semibold'
                           : 'border-[#eae7e0] text-[#aaaaaa] hover:border-[#1A2F23] hover:text-[#1A2F23]'
-                      }${idx > 0 && product.image_url_alt ? ' relative' : ''}`}
+                      }`}
                     >
                       {color}
-                      {idx > 0 && product.image_url_alt && (
-                        <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#7BAF8E]" />
-                      )}
                     </button>
                   ))}
                 </div>
