@@ -167,6 +167,82 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Nossa História */}
+      <section id="nossa-historia" className="py-24 bg-[#f8f7f4]">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="grid grid-cols-1 md:grid-cols-[60%_40%] gap-12 md:gap-16 items-center"
+          >
+            {/* Left: Text */}
+            <div className="border-l-[3px] border-[#7BAF8E] pl-8">
+              <p className="text-[9px] font-extrabold text-[#7BAF8E] uppercase tracking-[5px] italic mb-2">
+                Do apito inicial ao último minuto
+              </p>
+              <h2 className="text-2xl font-extrabold text-[#1A2F23] uppercase tracking-[6px] mb-8">
+                NOSSA HISTÓRIA
+              </h2>
+              <div className="flex flex-col gap-4 text-sm text-[#333] leading-relaxed">
+                <p>
+                  A Novant nasceu de uma obsessão simples: os 90 minutos mais intensos do esporte.
+                </p>
+                <p>
+                  O nome vem do italiano <em>novanta</em> — noventa — uma homenagem a cada segundo que separa o começo do fim, a tentativa da conquista, o esforço do resultado.
+                </p>
+                <p>
+                  Fundada em Curitiba em 2026, a Novant surgiu da frustração de um grupo de jogadores amadores que não encontravam, no mercado brasileiro, chuteiras que unissem performance real e identidade visual. Eram produtos genéricos demais, caros demais ou inacessíveis demais.
+                </p>
+                <p>
+                  A resposta foi criar uma curadoria diferente: selecionar apenas o que realmente importa dentro de campo. Sem exageros, sem promessas vazias. Apenas equipamento feito para quem joga de verdade — seja no gramado molhado de domingo ou na quadra de sexta à noite.
+                </p>
+                <p>
+                  Hoje, a Novant representa quatro das maiores marcas do futebol mundial e atende jogadores de todo o Brasil. Mas a obsessão continua a mesma: fazer cada minuto em campo valer a pena.
+                </p>
+              </div>
+              <p className="mt-8 text-base font-bold text-[#1A2F23] italic">
+                "Every Minute Counts."
+              </p>
+            </div>
+
+            {/* Right: Decorative "90" + stat cards */}
+            <div className="relative flex items-center justify-center min-h-[320px]">
+              {/* Large "90" decorative */}
+              <span
+                className="absolute select-none font-extrabold text-[#1A2F23] leading-none"
+                style={{ fontSize: 'clamp(180px, 22vw, 260px)', opacity: 0.07 }}
+                aria-hidden="true"
+              >
+                90
+              </span>
+
+              {/* Stat cards */}
+              <div className="relative z-10 flex flex-col gap-4 w-full max-w-[220px]">
+                {[
+                  { value: '4', label: 'Marcas Parceiras', delay: 0.1 },
+                  { value: '12+', label: 'Produtos Selecionados', delay: 0.2 },
+                  { value: '2026', label: 'Fundada em', delay: 0.3 },
+                ].map((stat) => (
+                  <motion.div
+                    key={stat.label}
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: stat.delay, ease: [0.16, 1, 0.3, 1] }}
+                    className="bg-white rounded-none shadow-sm px-6 py-4"
+                  >
+                    <p className="text-3xl font-extrabold text-[#1A2F23] leading-none">{stat.value}</p>
+                    <p className="text-[9px] uppercase tracking-[3px] text-gray-400 mt-1">{stat.label}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Brands */}
       <section className="py-16 bg-[#f8f7f4]">
         <div className="max-w-4xl mx-auto px-4">
