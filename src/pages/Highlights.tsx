@@ -104,7 +104,7 @@ const Highlights = () => {
             transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="text-white/60 text-xl italic"
           >
-            Temporada 2025 — Os escolhidos
+            Temporada 2026 — Os escolhidos
           </motion.p>
         </motion.div>
 
