@@ -8,6 +8,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { toast } from 'sonner';
 import ProductCard from '@/components/ProductCard';
+import SizeGuideModal from '@/components/SizeGuideModal';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +21,7 @@ const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [mainImage, setMainImage] = useState<string>('');
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -224,6 +226,12 @@ const ProductDetail = () => {
                     </button>
                   ))}
                 </div>
+                <button
+                  onClick={() => setSizeGuideOpen(true)}
+                  className="mt-2 text-xs text-[#1A2F23] hover:underline cursor-pointer"
+                >
+                  Guia de Tamanhos &rarr;
+                </button>
               </div>
             )}
 
@@ -336,6 +344,12 @@ const ProductDetail = () => {
           </div>
         )}
       </div>
+
+      <SizeGuideModal
+        open={sizeGuideOpen}
+        onClose={() => setSizeGuideOpen(false)}
+        initialBrand={product.brand}
+      />
     </div>
   );
 };
