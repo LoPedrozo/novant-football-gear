@@ -13,9 +13,12 @@ interface ProductCardProps {
     image_url?: string | null;
     [key: string]: any;
   };
+  index?: number;
 }
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const URGENCY_INDICES = new Set([0, 3, 7]);
+
+const ProductCard = ({ product, index }: ProductCardProps) => {
   const { toggleItem, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(product.id);
 
@@ -64,6 +67,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
               strokeWidth={1.5}
             />
           </button>
+          {index !== undefined && URGENCY_INDICES.has(index) && (
+            <span className="absolute bottom-3 left-3 bg-[#1A2F23] text-white text-xs px-2 py-1 rounded-none">
+              🔥 Últimas unidades
+            </span>
+          )}
         </div>
 
         {/* Info */}

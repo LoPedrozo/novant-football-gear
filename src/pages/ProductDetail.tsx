@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, Heart, Loader2, ChevronRight } from 'lucide-react';
+import { Star, Heart, Loader2, ChevronRight, Shield, RefreshCw, Truck, BadgeCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveProductImage } from '@/lib/productImages';
@@ -173,6 +173,12 @@ const ProductDetail = () => {
               {product.name}
             </h1>
 
+            {(product.featured || product.original_price) && (
+              <p className="text-sm font-medium text-[#7BAF8E] -mt-4">
+                ⚡ Restam poucas unidades
+              </p>
+            )}
+
             {/* Rating */}
             {product.rating && (
               <div className="flex items-center gap-1.5 -mt-3">
@@ -282,6 +288,22 @@ const ProductDetail = () => {
               />
               {inWishlist ? 'Remover dos Favoritos' : 'Adicionar aos Favoritos'}
             </button>
+
+            {/* Trust badges */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-[#eae7e0]">
+              {[
+                { icon: Shield, title: 'Compra Segura', subtitle: 'Pagamento 100% seguro' },
+                { icon: RefreshCw, title: 'Troca Fácil', subtitle: '30 dias para trocar' },
+                { icon: Truck, title: 'Entrega Rápida', subtitle: 'Para todo o Brasil' },
+                { icon: BadgeCheck, title: 'Produto Original', subtitle: 'Garantia de autenticidade' },
+              ].map((badge) => (
+                <div key={badge.title} className="flex flex-col items-center text-center gap-1.5">
+                  <badge.icon className="h-5 w-5 text-[#7BAF8E]" strokeWidth={1.5} />
+                  <p className="text-[10px] font-bold text-[#1A2F23] uppercase tracking-wide">{badge.title}</p>
+                  <p className="text-[10px] text-[#aaaaaa]">{badge.subtitle}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </motion.div>
 

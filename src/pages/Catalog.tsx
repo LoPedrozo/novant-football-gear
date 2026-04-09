@@ -138,7 +138,7 @@ const Catalog = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.03 }}
               >
-                <ProductCard product={product} />
+                <ProductCard product={product} index={i} />
               </motion.div>
             ))}
           </div>
