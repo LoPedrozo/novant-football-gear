@@ -10,11 +10,13 @@ import CartDrawer from '@/components/CartDrawer';
 import AuthModal from '@/components/AuthModal';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import SearchBar from '@/components/SearchBar';
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const { user, signOut } = useAuth();
   const { totalItems, openCart, closeCart } = useCart();
   const { totalItems: wishlistCount } = useWishlist();
@@ -71,9 +73,7 @@ const Navbar = () => {
 
         {/* Right icons */}
         <div className="hidden md:flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-55 hover:opacity-100 hover:bg-transparent">
-            <Search className="h-[18px] w-[18px]" strokeWidth={1.5} />
-          </Button>
+          <SearchBar open={searchOpen} onOpen={() => setSearchOpen(true)} onClose={() => setSearchOpen(false)} />
           <Link to="/favoritos" className="relative inline-flex items-center justify-center h-9 w-9 text-[#1A2F23] opacity-55 hover:opacity-100 transition-opacity">
             <Heart className="h-[18px] w-[18px]" strokeWidth={1.5} />
             {wishlistCount > 0 && (
@@ -140,7 +140,9 @@ const Navbar = () => {
             <Link to="/destaques" onClick={() => setMobileOpen(false)} className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] py-3 border-b border-[#eae7e0]">Destaques</Link>
             <Link to="/contato" onClick={() => setMobileOpen(false)} className="text-[10px] font-normal uppercase tracking-[2.5px] text-[#1A2F23] py-3 border-b border-[#eae7e0]">Contato</Link>
             <div className="flex items-center gap-5 pt-4">
-              <Search className="h-5 w-5 text-[#1A2F23] opacity-55" strokeWidth={1.5} />
+              <button onClick={() => { setMobileOpen(false); setSearchOpen(true); }}>
+                <Search className="h-5 w-5 text-[#1A2F23] opacity-55" strokeWidth={1.5} />
+              </button>
               <Link to="/favoritos" onClick={() => setMobileOpen(false)} className="relative">
                 <Heart className="h-5 w-5 text-[#1A2F23] opacity-55" strokeWidth={1.5} />
                 {wishlistCount > 0 && (
