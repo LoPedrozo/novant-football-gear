@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { SlidersHorizontal, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -6,12 +7,23 @@ import ProductCard from '@/components/ProductCard';
 import { categories, brands } from '@/lib/mockData';
 import { supabase } from '@/integrations/supabase/client';
 
+const normalize = (str: string) =>
+  str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
 const Catalog = () => {
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedBrand, setSelectedBrand] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('featured');
+
+  useEffect(() => {
+    const categoriaParam = searchParams.get('categoria');
+    if (categoriaParam) {
+      setSelectedCategory(categoriaParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -25,7 +37,7 @@ const Catalog = () => {
   let filtered = [...products];
 
   if (selectedCategory !== 'all') {
-    filtered = filtered.filter((p) => p.category === selectedCategory);
+    filtered = filtered.filter((p) => p.category && normalize(p.category) === normalize(selectedCategory));
   }
   if (selectedBrand !== 'all') {
     filtered = filtered.filter((p) => p.brand === selectedBrand);

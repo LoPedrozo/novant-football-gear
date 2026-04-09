@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ProductCard from '@/components/ProductCard';
@@ -51,6 +51,7 @@ const FootballField = () => (
 );
 
 const Index = () => {
+  const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -120,6 +121,7 @@ const Index = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: i * 0.1 }}
                 className="group relative aspect-[3/4] overflow-hidden cursor-pointer rounded-lg"
+                onClick={() => navigate(`/catalogo?categoria=${cat.slug}`)}
               >
                 <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                 <div className="absolute inset-0 bg-[#1A2F23]/40 group-hover:bg-[#1A2F23]/60 transition-colors duration-500" />
