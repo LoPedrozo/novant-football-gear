@@ -19,21 +19,26 @@ Novant é uma loja virtual de artigos esportivos de futebol, oferecendo chuteira
 
 ## Funcionalidades
 
-- Catálogo com 12 produtos (chuteiras campo, futsal, society, caneleiras, meias, bolsa)
+- Catálogo com produtos (chuteiras campo, futsal, society, caneleiras, meias, bolsa)
 - Página individual de produto com seleção de tamanho e cor
 - Filtros por categoria e marca com ordenação por preço e avaliação
+- Avaliações de produtos com submissão, edição e exclusão
 - Produtos em destaque na página inicial
+- Barra de busca com pesquisa em tempo real
+- Carrinho de compras com drawer lateral
+- Lista de favoritos (wishlist)
+- Autenticação de usuário (login, cadastro e OAuth via Google)
+- Página de perfil com edição de informações e upload de avatar
+- Páginas institucionais: Contato, Política de Privacidade, Termos de Uso e Trocas & Devoluções
 - Integração com banco de dados Supabase
 - Design responsivo (mobile-first)
 - Marcas: Nike, Adidas, Puma, New Balance
 
 ## Em Desenvolvimento
 
-- Carrinho de compras
-- Autenticação de usuário (login/cadastro)
-- Lista de favoritos
-- Página de Destaques com animações de scroll
-- Página de Contato
+- ⏳ Redes sociais fictícias
+- ⏳ Checkout completo
+- ⏳ Meus Pedidos
 
 ## Rodando Localmente
 
