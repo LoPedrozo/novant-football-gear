@@ -106,7 +106,7 @@ const Navbar = () => {
                   {displayName}
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => toast('Em breve!')} className="flex items-center gap-2 text-xs uppercase tracking-wider">
+                <DropdownMenuItem onClick={() => navigate('/perfil')} className="flex items-center gap-2 text-xs uppercase tracking-wider">
                   <UserCircle className="h-4 w-4" /> Meu Perfil
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => toast('Em breve!')} className="flex items-center gap-2 text-xs uppercase tracking-wider">
