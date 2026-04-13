@@ -131,7 +131,7 @@ const Navbar = () => {
                   ) : (
                     <div className="h-7 w-7 bg-[#1A2F23] flex items-center justify-center rounded-full">
                       <span className="text-[10px] font-bold text-[#E8E3DA]">
-                        {(displayName || 'U').charAt(0).toUpperCase()}
+                        {(displayName || 'U').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()}
                       </span>
                     </div>
                   )}
