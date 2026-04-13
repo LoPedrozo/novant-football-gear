@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -12,7 +12,6 @@ import Footer from "@/components/Footer";
 import Index from "./pages/Index";
 import Catalog from "./pages/Catalog";
 import ProductDetail from "./pages/ProductDetail";
-import Highlights from "./pages/Highlights";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import AuthCallback from "./pages/AuthCallback";
@@ -29,8 +28,6 @@ const AppShell = () => {
   const { loading: authLoading } = useAuth();
   const { loading: cartLoading } = useCart();
   const { loading: wishlistLoading } = useWishlist();
-  const location = useLocation();
-  const hideFooter = location.pathname === '/destaques';
 
   if (authLoading || cartLoading || wishlistLoading) {
     return (
@@ -47,7 +44,6 @@ const AppShell = () => {
         <Route path="/" element={<Index />} />
         <Route path="/catalogo" element={<Catalog />} />
         <Route path="/produto/:id" element={<ProductDetail />} />
-        <Route path="/destaques" element={<Highlights />} />
         <Route path="/contato" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
@@ -58,7 +54,7 @@ const AppShell = () => {
         <Route path="/trocas" element={<Returns />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      {!hideFooter && <Footer />}
+      <Footer />
     </>
   );
 };
