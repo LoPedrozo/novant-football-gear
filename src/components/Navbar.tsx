@@ -6,6 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
+import { supabase } from '@/integrations/supabase/client';
 import CartDrawer from '@/components/CartDrawer';
 import AuthModal from '@/components/AuthModal';
 import { toast } from 'sonner';
@@ -50,7 +51,39 @@ const Navbar = () => {
     navigate('/');
   };
 
-  const displayName = user?.user_metadata?.full_name || user?.email || '';
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [profileName, setProfileName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) { setAvatarUrl(null); setProfileName(null); return; }
+    const fetchProfile = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('avatar_url, full_name')
+        .eq('id', user.id)
+        .single();
+      if (data) {
+        setAvatarUrl(data.avatar_url || null);
+        setProfileName(data.full_name || null);
+      }
+    };
+    fetchProfile();
+
+    const channel = supabase
+      .channel('navbar-profile')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, (payload: any) => {
+        const updated = payload.new;
+        if (updated) {
+          setAvatarUrl(updated.avatar_url || null);
+          setProfileName(updated.full_name || null);
+        }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
+  const displayName = profileName || user?.user_metadata?.full_name || user?.email || '';
 
   return (
     <nav className={cn(
@@ -93,11 +126,15 @@ const Navbar = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="text-[#1A2F23] opacity-55 hover:opacity-100 hover:bg-transparent">
-                  <div className="h-7 w-7 bg-[#1A2F23] flex items-center justify-center">
-                    <span className="text-[10px] font-bold text-[#E8E3DA]">
-                      {(displayName || 'U').charAt(0).toUpperCase()}
-                    </span>
-                  </div>
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
+                  ) : (
+                    <div className="h-7 w-7 bg-[#1A2F23] flex items-center justify-center rounded-full">
+                      <span className="text-[10px] font-bold text-[#E8E3DA]">
+                        {(displayName || 'U').charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 rounded-none">
